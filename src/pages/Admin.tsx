@@ -7,6 +7,7 @@ import LiveFeed from "@/components/admin/LiveFeed";
 import AlertPanel from "@/components/admin/AlertPanel";
 import ZoneStatus from "@/components/admin/ZoneStatus";
 import PerformanceMetrics from "@/components/admin/PerformanceMetrics";
+import PilotZonePanel from "@/components/admin/PilotZonePanel";
 
 const Admin = () => {
   const [cityHealthScore] = useState(94);
@@ -101,6 +102,9 @@ const Admin = () => {
           <ZoneStatus />
           <PerformanceMetrics />
         </div>
+
+        {/* Pilot Zone A Operational Context */}
+        <PilotZonePanel />
       </main>
     </div>
   );
