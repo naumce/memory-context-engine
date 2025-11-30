@@ -61,11 +61,11 @@ const Index = () => {
 
           <div className="glass rounded-lg p-8 border-2 border-border hover:border-warning/50 transition-all">
             <div className="w-12 h-12 rounded-lg bg-warning/20 flex items-center justify-center mb-4">
-              <Coins className="w-6 h-6 text-warning" />
+              <TrendingUp className="w-6 h-6 text-warning" />
             </div>
-            <h3 className="font-display text-xl mb-3">StrugaCoin Economy</h3>
+            <h3 className="font-display text-xl mb-3">Performance Analytics</h3>
             <p className="text-muted-foreground">
-              Gamified recycling rewards system turning waste management into an addictive civic engagement game.
+              Real-time metrics and KPIs tracking collection efficiency, citizen participation, and environmental impact.
             </p>
           </div>
         </div>

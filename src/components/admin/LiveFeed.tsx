@@ -10,14 +10,14 @@ interface FeedEvent {
 }
 
 const mockEvents: FeedEvent[] = [
-  { id: "1", type: "coin", message: "Elena K. earned 20 STG for recycling 2kg plastic", time: "2s ago", icon: Coins },
+  { id: "1", type: "collection", message: "Elena K. recycled 2kg plastic - bin collected", time: "2s ago", icon: CheckCircle },
   { id: "2", type: "collection", message: "Truck 01 completed Zone A collection route", time: "12s ago", icon: CheckCircle },
-  { id: "3", type: "citizen", message: "New citizen registered: Nikola P.", time: "34s ago", icon: Users },
-  { id: "4", type: "coin", message: "Ivan M. earned 15 STG for glass recycling", time: "1m ago", icon: Coins },
+  { id: "3", type: "citizen", message: "New household registered: Nikola P. - Zone B", time: "34s ago", icon: Users },
+  { id: "4", type: "collection", message: "Ivan M. glass recycling bin collected", time: "1m ago", icon: Trash2 },
   { id: "5", type: "milestone", message: "Zone B reached 85% participation rate!", time: "2m ago", icon: TrendingUp },
   { id: "6", type: "collection", message: "Truck 02 arrived at depot for unload", time: "3m ago", icon: Trash2 },
-  { id: "7", type: "coin", message: "Marija S. earned 25 STG for paper recycling", time: "4m ago", icon: Coins },
-  { id: "8", type: "citizen", message: "Stefan K. completed first mission!", time: "5m ago", icon: Users },
+  { id: "7", type: "collection", message: "Marija S. paper recycling - 3kg collected", time: "4m ago", icon: CheckCircle },
+  { id: "8", type: "milestone", message: "Stefan K. reached 10 collections milestone!", time: "5m ago", icon: TrendingUp },
 ];
 
 const LiveFeed = () => {
@@ -43,10 +43,9 @@ const LiveFeed = () => {
 
   const getEventColor = (type: string) => {
     switch (type) {
-      case "coin": return "text-primary";
-      case "collection": return "text-secondary";
+      case "collection": return "text-primary";
       case "milestone": return "text-warning";
-      case "citizen": return "text-foreground";
+      case "citizen": return "text-secondary";
       default: return "text-muted-foreground";
     }
   };
