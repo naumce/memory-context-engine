@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Activity, Truck, Coins, AlertTriangle, Zap, TrendingUp } from "lucide-react";
+import { Activity, Truck, TrendingUp, Zap } from "lucide-react";
 import MetricCard from "@/components/admin/MetricCard";
 import MapView from "@/components/admin/MapView";
 import FleetList from "@/components/admin/FleetList";
 import LiveFeed from "@/components/admin/LiveFeed";
 import AlertPanel from "@/components/admin/AlertPanel";
+import ZoneStatus from "@/components/admin/ZoneStatus";
+import PerformanceMetrics from "@/components/admin/PerformanceMetrics";
 
 const Admin = () => {
   const [cityHealthScore] = useState(94);
@@ -50,11 +52,11 @@ const Admin = () => {
             variant="primary"
           />
           <MetricCard
-            title="Revenue Today"
-            value={revenueToday}
-            unit="€"
-            icon={Coins}
-            trend="+12%"
+            title="Households Engaged"
+            value={2800}
+            unit=""
+            icon={Activity}
+            trend="+8%"
             variant="secondary"
           />
           <MetricCard
@@ -92,6 +94,12 @@ const Admin = () => {
           <div className="lg:col-span-3">
             <LiveFeed />
           </div>
+        </div>
+
+        {/* Analytics Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <ZoneStatus />
+          <PerformanceMetrics />
         </div>
       </main>
     </div>
