@@ -15,12 +15,17 @@ export const useZones = () => {
   return useQuery({
     queryKey: ["zones"],
     queryFn: async () => {
+      console.log("Fetching zones...");
       const { data, error } = await supabase
         .from("zones")
         .select("*")
         .order("code");
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching zones:", error);
+        throw error;
+      }
+      console.log("Zones data:", data);
       return data as Zone[];
     },
   });

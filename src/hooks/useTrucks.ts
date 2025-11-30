@@ -31,15 +31,43 @@ export const useTrucks = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("trucks")
-        .select(`
-          *,
-          driver:drivers(full_name, phone),
-          zone:zones(name, code)
-        `)
+        .select("*")
         .order("vehicle_id");
       
-      if (error) throw error;
-      return data as TruckWithDetails[];
+      if (error) {
+        console.error("Error fetching trucks:", error);
+        throw error;
+      }
+      
+      // Fetch related data separately
+      const trucksWithDetails = await Promise.all(
+        (data || []).map(async (truck) => {
+          let driver = undefined;
+          let zone = undefined;
+          
+          if (truck.current_driver_id) {
+            const { data: driverData } = await supabase
+              .from("drivers")
+              .select("full_name, phone")
+              .eq("id", truck.current_driver_id)
+              .single();
+            driver = driverData || undefined;
+          }
+          
+          if (truck.current_zone_id) {
+            const { data: zoneData } = await supabase
+              .from("zones")
+              .select("name, code")
+              .eq("id", truck.current_zone_id)
+              .single();
+            zone = zoneData || undefined;
+          }
+          
+          return { ...truck, driver, zone } as TruckWithDetails;
+        })
+      );
+      
+      return trucksWithDetails;
     },
   });
 };
@@ -48,15 +76,21 @@ export const useActiveTrucks = () => {
   return useQuery({
     queryKey: ["active-trucks"],
     queryFn: async () => {
+      console.log("Fetching active trucks...");
       const { data: allTrucks, error: allError } = await supabase
         .from("trucks")
         .select("id, status");
 
-      if (allError) throw allError;
+      if (allError) {
+        console.error("Error fetching trucks:", allError);
+        throw allError;
+      }
 
+      console.log("All trucks:", allTrucks);
       const active = allTrucks?.filter(t => t.status === "active").length || 0;
       const total = allTrucks?.length || 0;
 
+      console.log("Active trucks:", active, "Total:", total);
       return { active, total };
     },
   });
