@@ -2,17 +2,20 @@ import { useState } from "react";
 import { MapPin, Navigation, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTrucks } from "@/hooks/useTrucks";
 
 const MapView = () => {
   const [mapboxToken, setMapboxToken] = useState("");
   const [showTokenInput, setShowTokenInput] = useState(true);
+  const { data: trucksData } = useTrucks();
 
-  // Mock truck locations
-  const trucks = [
-    { id: "TRK-01", lat: 41.1781, lng: 20.7714, status: "active" },
-    { id: "TRK-02", lat: 41.1821, lng: 20.7654, status: "active" },
-    { id: "TRK-03", lat: 41.1741, lng: 20.7784, status: "idle" },
-  ];
+  // Map truck data to display format with simulated coordinates
+  const trucks = trucksData?.map((truck, idx) => ({
+    id: truck.vehicle_id,
+    lat: 41.1781 + (idx * 0.004),
+    lng: 20.7714 - (idx * 0.006),
+    status: truck.status,
+  })) || [];
 
   return (
     <div className="glass rounded-lg border-2 border-border overflow-hidden h-[600px] relative">

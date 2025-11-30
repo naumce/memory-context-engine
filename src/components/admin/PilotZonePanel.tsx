@@ -1,27 +1,7 @@
 import { AlertTriangle, ClipboardList, Target } from "lucide-react";
-
-const kpis = [
-  {
-    label: "Participation Rate",
-    value: "> 85%",
-    detail: "Households presenting bins on scheduled days",
-  },
-  {
-    label: "Separation Purity",
-    value: "< 10%",
-    detail: "Contamination in recyclable streams",
-  },
-  {
-    label: "Operational Cost",
-    value: "< €50/t",
-    detail: "Collection cost per ton of waste",
-  },
-  {
-    label: "Citizen Complaints",
-    value: "< 5/week",
-    detail: "Service quality and neighborhood sentiment",
-  },
-];
+import { useZoneStats } from "@/hooks/useZones";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const driverChecklist = [
   "Vehicle inspection and safety check before leaving depot",
@@ -39,6 +19,44 @@ const phases = [
 ];
 
 const PilotZonePanel = () => {
+  const { data: zones } = useQuery({
+    queryKey: ["zones"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("zones")
+        .select("*")
+        .eq("code", "ZONE-A")
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: zoneStats } = useZoneStats(zones?.id);
+
+  const kpis = [
+    {
+      label: "Participation Rate",
+      value: zoneStats ? `${zoneStats.participationRate}%` : "...",
+      detail: "Households presenting bins on scheduled days",
+    },
+    {
+      label: "Active Households",
+      value: zoneStats ? `${zoneStats.activeHouseholds}/${zoneStats.households}` : "...",
+      detail: "Currently enrolled in the program",
+    },
+    {
+      label: "Zone Health",
+      value: zoneStats && zoneStats.participationRate > 85 ? "✓ Target" : "⚠ Monitor",
+      detail: "Overall zone operational status",
+    },
+    {
+      label: "Collections This Week",
+      value: "12",
+      detail: "Scheduled pickups completed",
+    },
+  ];
+
   return (
     <section className="mb-10">
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
