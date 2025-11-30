@@ -26,17 +26,28 @@ const generateParticipationData = (zones: any[]) => {
 };
 
 const PerformanceMetrics = () => {
-  const { data: zones } = useQuery({
-    queryKey: ["zones"],
+  const { data: zones, isLoading } = useQuery({
+    queryKey: ["zones-performance"],
     queryFn: async () => {
       const { data, error } = await supabase.from("zones").select("*");
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching zones for performance:", error);
+        throw error;
+      }
       return data;
     },
   });
 
   const collectionData = generateCollectionData();
-  const participationData = zones ? generateParticipationData(zones) : [];
+  const participationData = zones && zones.length > 0 ? generateParticipationData(zones) : [];
+
+  if (isLoading) {
+    return (
+      <div className="glass rounded-lg border-2 border-border p-6">
+        <p className="text-muted-foreground">Loading performance data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="glass rounded-lg border-2 border-border p-6">
@@ -137,14 +148,18 @@ const PerformanceMetrics = () => {
             </ResponsiveContainer>
           </div>
           <div className="mt-4 grid grid-cols-4 gap-2">
-            {['A', 'B', 'C', 'D'].map((zone, idx) => (
-              <div key={zone} className="glass rounded px-3 py-2">
-                <p className="text-xs text-muted-foreground">Zone {zone}</p>
-                <p className="text-sm font-mono font-semibold">
-                  {participationData[participationData.length - 1][`zone${zone}` as keyof typeof participationData[0]]}%
-                </p>
-              </div>
-            ))}
+            {participationData.length > 0 && ['A', 'B', 'C', 'D'].map((zone) => {
+              const latestData = participationData[participationData.length - 1];
+              const zoneKey = `zone${zone}` as keyof typeof latestData;
+              return (
+                <div key={zone} className="glass rounded px-3 py-2">
+                  <p className="text-xs text-muted-foreground">Zone {zone}</p>
+                  <p className="text-sm font-mono font-semibold">
+                    {latestData[zoneKey]}%
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </TabsContent>
       </Tabs>

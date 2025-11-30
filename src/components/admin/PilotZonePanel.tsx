@@ -19,20 +19,35 @@ const phases = [
 ];
 
 const PilotZonePanel = () => {
-  const { data: zones } = useQuery({
-    queryKey: ["zones"],
+  const { data: zones, isLoading, error } = useQuery({
+    queryKey: ["pilot-zone"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("zones")
         .select("*")
         .eq("code", "ZONE-A")
         .single();
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching Zone A:", error);
+        throw error;
+      }
       return data;
     },
   });
 
   const { data: zoneStats } = useZoneStats(zones?.id);
+
+  if (isLoading) {
+    return <section className="mb-10">
+      <div className="glass rounded-lg p-6">Loading pilot zone data...</div>
+    </section>;
+  }
+
+  if (error) {
+    return <section className="mb-10">
+      <div className="glass rounded-lg p-6 text-destructive">Error loading pilot zone</div>
+    </section>;
+  }
 
   const kpis = [
     {
