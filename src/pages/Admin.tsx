@@ -9,8 +9,15 @@ import PerformanceMetrics from "@/components/admin/PerformanceMetrics";
 import PilotZonePanel from "@/components/admin/PilotZonePanel";
 import { useActiveTrucks } from "@/hooks/useTrucks";
 import { useZones } from "@/hooks/useZones";
+import { useRealtimeTrucks } from "@/hooks/useRealtimeTrucks";
+import { useRealtimeZones } from "@/hooks/useRealtimeZones";
+import { useRealtimeCollections } from "@/hooks/useRealtimeCollections";
 
 const Admin = () => {
+  useRealtimeTrucks();
+  useRealtimeZones();
+  useRealtimeCollections();
+  
   const { data: truckStats, isLoading: trucksLoading } = useActiveTrucks();
   const { data: zones, isLoading: zonesLoading } = useZones();
   

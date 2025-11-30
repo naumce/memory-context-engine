@@ -145,18 +145,22 @@ const PerformanceMetrics = () => {
             </ResponsiveContainer>
           </div>
           <div className="mt-4 grid grid-cols-4 gap-2">
-            {participationData.length > 0 && ['A', 'B', 'C', 'D'].map((zone) => {
+            {participationData.length > 0 ? ['A', 'B', 'C', 'D'].map((zone) => {
               const latestData = participationData[participationData.length - 1];
               const zoneKey = `zone${zone}` as keyof typeof latestData;
               return (
                 <div key={zone} className="glass rounded px-3 py-2">
                   <p className="text-xs text-muted-foreground">Zone {zone}</p>
                   <p className="text-sm font-mono font-semibold">
-                    {latestData[zoneKey]}%
+                    {latestData?.[zoneKey] || 0}%
                   </p>
                 </div>
               );
-            })}
+            }) : (
+              <div className="col-span-4 text-center text-sm text-muted-foreground">
+                No zone data available
+              </div>
+            )}
           </div>
         </TabsContent>
       </Tabs>
