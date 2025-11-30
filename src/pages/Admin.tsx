@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Activity, Truck, TrendingUp, Zap } from "lucide-react";
 import MetricCard from "@/components/admin/MetricCard";
 import MapView from "@/components/admin/MapView";
@@ -8,12 +7,16 @@ import AlertPanel from "@/components/admin/AlertPanel";
 import ZoneStatus from "@/components/admin/ZoneStatus";
 import PerformanceMetrics from "@/components/admin/PerformanceMetrics";
 import PilotZonePanel from "@/components/admin/PilotZonePanel";
+import { useActiveTrucks } from "@/hooks/useTrucks";
+import { useZones } from "@/hooks/useZones";
 
 const Admin = () => {
-  const [cityHealthScore] = useState(94);
-  const [revenueToday] = useState(1240);
-  const [wasteCollected] = useState(42);
-  const [activeTrucks] = useState({ active: 8, total: 10 });
+  const { data: truckStats } = useActiveTrucks();
+  const { data: zones } = useZones();
+  
+  const cityHealthScore = 94;
+  const householdsEngaged = zones?.reduce((sum, z) => sum + (z.households_count || 0), 0) || 2800;
+  const wasteCollected = 42;
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,7 +57,7 @@ const Admin = () => {
           />
           <MetricCard
             title="Households Engaged"
-            value={2800}
+            value={householdsEngaged}
             unit=""
             icon={Activity}
             trend="+8%"
@@ -70,7 +73,7 @@ const Admin = () => {
           />
           <MetricCard
             title="Active Trucks"
-            value={`${activeTrucks.active}/${activeTrucks.total}`}
+            value={`${truckStats?.active || 0}/${truckStats?.total || 0}`}
             icon={Truck}
             variant="muted"
           />

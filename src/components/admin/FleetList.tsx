@@ -1,14 +1,16 @@
 import { Truck, Battery, MapPin, Clock } from "lucide-react";
-
-const fleetData = [
-  { id: "TRK-01", driver: "Marko D.", status: "active", battery: 87, speed: 32, zone: "Zone A" },
-  { id: "TRK-02", driver: "Stefan K.", status: "active", battery: 92, speed: 28, zone: "Zone B" },
-  { id: "TRK-03", driver: "Ivan P.", status: "idle", battery: 100, speed: 0, zone: "Depot" },
-  { id: "TRK-04", driver: "Nikola M.", status: "active", battery: 65, speed: 35, zone: "Zone C" },
-  { id: "TRK-05", driver: "Gjoko T.", status: "charging", battery: 45, speed: 0, zone: "Depot" },
-];
+import { useTrucks } from "@/hooks/useTrucks";
 
 const FleetList = () => {
+  const { data: trucks, isLoading } = useTrucks();
+  
+  if (isLoading) {
+    return (
+      <div className="glass rounded-lg border-2 border-border p-4 h-[600px] flex items-center justify-center">
+        <p className="text-muted-foreground font-mono text-sm">Loading fleet...</p>
+      </div>
+    );
+  }
   return (
     <div className="glass rounded-lg border-2 border-border p-4 h-[600px] overflow-y-auto">
       <div className="flex items-center gap-3 mb-6">
@@ -22,7 +24,7 @@ const FleetList = () => {
       </div>
 
       <div className="space-y-3">
-        {fleetData.map((truck) => (
+        {trucks?.map((truck) => (
           <div
             key={truck.id}
             className="glass rounded-lg p-4 border border-border hover:border-primary/50 transition-all cursor-pointer"
@@ -36,7 +38,7 @@ const FleetList = () => {
                   truck.status === "charging" ? "bg-warning" :
                   "bg-muted-foreground"
                 )} />
-                <span className="font-mono text-sm font-bold">{truck.id}</span>
+                <span className="font-mono text-sm font-bold">{truck.vehicle_id}</span>
               </div>
               <span className={cn(
                 "text-xs font-mono px-2 py-1 rounded uppercase",
@@ -50,7 +52,9 @@ const FleetList = () => {
 
             {/* Driver */}
             <p className="text-xs text-muted-foreground mb-3">
-              <span className="font-semibold text-foreground">{truck.driver}</span>
+              <span className="font-semibold text-foreground">
+                {truck.driver?.full_name || "No driver assigned"}
+              </span>
             </p>
 
             {/* Stats Grid */}
@@ -58,19 +62,21 @@ const FleetList = () => {
               <div className="flex items-center gap-2">
                 <Battery className={cn(
                   "w-3 h-3",
-                  truck.battery > 80 ? "text-primary" :
-                  truck.battery > 50 ? "text-warning" :
+                  truck.battery_level > 80 ? "text-primary" :
+                  truck.battery_level > 50 ? "text-warning" :
                   "text-destructive"
                 )} />
-                <span className="font-mono">{truck.battery}%</span>
+                <span className="font-mono">{truck.battery_level}%</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-3 h-3 text-muted-foreground" />
-                <span className="font-mono">{truck.speed} km/h</span>
+                <span className="font-mono">{truck.status === "active" ? "32" : "0"} km/h</span>
               </div>
               <div className="flex items-center gap-2 col-span-2">
                 <MapPin className="w-3 h-3 text-secondary" />
-                <span className="font-mono text-secondary">{truck.zone}</span>
+                <span className="font-mono text-secondary">
+                  {truck.zone?.name || "Depot"}
+                </span>
               </div>
             </div>
           </div>
