@@ -9,17 +9,12 @@ const MapView = () => {
   const [showTokenInput, setShowTokenInput] = useState(true);
   const { data: trucksData, isLoading } = useTrucks();
 
-  // Map truck data to display format with simulated coordinates
   const trucks = trucksData?.map((truck, idx) => ({
     id: truck.vehicle_id,
     lat: 41.1781 + (idx * 0.004),
     lng: 20.7714 - (idx * 0.006),
     status: truck.status,
   })) || [];
-
-  if (isLoading) {
-    console.log("Loading trucks...");
-  }
 
   return (
     <div className="glass rounded-lg border-2 border-border overflow-hidden h-[600px] relative">
