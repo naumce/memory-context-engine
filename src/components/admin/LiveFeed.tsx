@@ -1,102 +1,77 @@
-import { useEffect, useState } from "react";
-import { Coins, Trash2, TrendingUp, Users, CheckCircle } from "lucide-react";
-
-interface FeedEvent {
-  id: string;
-  type: "collection" | "coin" | "milestone" | "citizen";
-  message: string;
-  time: string;
-  icon: any;
-}
-
-const mockEvents: FeedEvent[] = [
-  { id: "1", type: "collection", message: "Elena K. recycled 2kg plastic - bin collected", time: "2s ago", icon: CheckCircle },
-  { id: "2", type: "collection", message: "Truck 01 completed Zone A collection route", time: "12s ago", icon: CheckCircle },
-  { id: "3", type: "citizen", message: "New household registered: Nikola P. - Zone B", time: "34s ago", icon: Users },
-  { id: "4", type: "collection", message: "Ivan M. glass recycling bin collected", time: "1m ago", icon: Trash2 },
-  { id: "5", type: "milestone", message: "Zone B reached 85% participation rate!", time: "2m ago", icon: TrendingUp },
-  { id: "6", type: "collection", message: "Truck 02 arrived at depot for unload", time: "3m ago", icon: Trash2 },
-  { id: "7", type: "collection", message: "Marija S. paper recycling - 3kg collected", time: "4m ago", icon: CheckCircle },
-  { id: "8", type: "milestone", message: "Stefan K. reached 10 collections milestone!", time: "5m ago", icon: TrendingUp },
-];
+import { Activity, CheckCircle2, Clock } from "lucide-react";
+import { useRecentCollections } from "@/hooks/useRecentCollections";
+import { formatDistanceToNow } from "date-fns";
 
 const LiveFeed = () => {
-  const [events, setEvents] = useState(mockEvents);
-  const [newEventCount, setNewEventCount] = useState(0);
-
-  useEffect(() => {
-    // Simulate new events every 5 seconds
-    const interval = setInterval(() => {
-      const randomEvent = mockEvents[Math.floor(Math.random() * mockEvents.length)];
-      const newEvent = {
-        ...randomEvent,
-        id: Date.now().toString(),
-        time: "just now",
-      };
-      setEvents(prev => [newEvent, ...prev.slice(0, 9)]);
-      setNewEventCount(prev => prev + 1);
-      setTimeout(() => setNewEventCount(0), 2000);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const getEventColor = (type: string) => {
-    switch (type) {
-      case "collection": return "text-primary";
-      case "milestone": return "text-warning";
-      case "citizen": return "text-secondary";
-      default: return "text-muted-foreground";
-    }
-  };
+  const { data: collections, isLoading } = useRecentCollections();
 
   return (
-    <div className="glass rounded-lg border-2 border-border p-4 h-[600px] flex flex-col">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/20">
-            <TrendingUp className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h3 className="font-display text-sm">LIVE FEED</h3>
-            <p className="text-xs text-muted-foreground font-mono">Real-time Activity</p>
-          </div>
+    <div className="glass rounded-lg border-2 border-border p-6 h-full">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 rounded-lg bg-accent/20">
+          <Activity className="w-5 h-5 text-accent animate-pulse" />
         </div>
-        {newEventCount > 0 && (
-          <div className="px-2 py-1 rounded-full bg-primary/20 border border-primary">
-            <span className="text-xs font-mono text-primary">+{newEventCount}</span>
-          </div>
-        )}
+        <div>
+          <h3 className="font-display text-sm">LIVE ACTIVITY FEED</h3>
+          <p className="text-xs text-muted-foreground font-mono">Real-time updates</p>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-2 pr-2">
-        {events.map((event, index) => {
-          const Icon = event.icon;
-          return (
+      <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Loading activity...</p>
+        ) : collections && collections.length > 0 ? (
+          collections.map((collection) => (
             <div
-              key={event.id}
-              className="glass rounded-lg p-3 border border-border/50 hover:border-primary/30 transition-all animate-in fade-in slide-in-from-top-2"
-              style={{ animationDelay: `${index * 50}ms` }}
+              key={collection.id}
+              className="glass rounded-lg p-4 border border-border/50 hover:border-primary/40 transition-all"
             >
-              <div className="flex gap-3">
-                <div className={cn("mt-0.5", getEventColor(event.type))}>
-                  <Icon className="w-4 h-4" />
+              <div className="flex items-start gap-3">
+                <div className="p-1.5 rounded-full bg-primary/15 border border-primary/40">
+                  <CheckCircle2 className="w-4 h-4 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs leading-relaxed">{event.message}</p>
-                  <p className="text-xs text-muted-foreground font-mono mt-1">{event.time}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-semibold font-mono">
+                      {collection.trucks.vehicle_id}
+                    </span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30">
+                      {collection.bins.bin_type}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Driver: {collection.drivers.full_name}
+                  </p>
+                  {collection.weight_kg && (
+                    <p className="text-xs text-muted-foreground">
+                      Weight: {collection.weight_kg} kg
+                    </p>
+                  )}
+                  {collection.contamination_level && collection.contamination_level !== 'clean' && (
+                    <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/30 mt-1">
+                      Contamination: {collection.contamination_level}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="w-3 h-3" />
+                  <span className="font-mono">
+                    {formatDistanceToNow(new Date(collection.collected_at || collection.created_at), {
+                      addSuffix: true,
+                    })}
+                  </span>
                 </div>
               </div>
             </div>
-          );
-        })}
+          ))
+        ) : (
+          <p className="text-sm text-muted-foreground text-center py-8">
+            No recent collections
+          </p>
+        )}
       </div>
     </div>
   );
 };
-
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(" ");
-}
 
 export default LiveFeed;

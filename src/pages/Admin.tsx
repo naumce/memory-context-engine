@@ -7,6 +7,7 @@ import AlertPanel from "@/components/admin/AlertPanel";
 import ZoneStatus from "@/components/admin/ZoneStatus";
 import PerformanceMetrics from "@/components/admin/PerformanceMetrics";
 import PilotZonePanel from "@/components/admin/PilotZonePanel";
+import RealtimeIndicator from "@/components/admin/RealtimeIndicator";
 import { useActiveTrucks } from "@/hooks/useTrucks";
 import { useZones } from "@/hooks/useZones";
 import { useRealtimeTrucks } from "@/hooks/useRealtimeTrucks";
@@ -48,6 +49,7 @@ const Admin = () => {
               <p className="text-sm text-muted-foreground font-mono">Command Center</p>
             </div>
             <div className="flex items-center gap-4">
+              <RealtimeIndicator />
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">The Chairman</p>
                 <p className="text-sm font-semibold">Admin</p>
