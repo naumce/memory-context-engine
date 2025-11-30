@@ -30,10 +30,7 @@ const PerformanceMetrics = () => {
     queryKey: ["zones-performance"],
     queryFn: async () => {
       const { data, error } = await supabase.from("zones").select("*");
-      if (error) {
-        console.error("Error fetching zones for performance:", error);
-        throw error;
-      }
+      if (error) throw error;
       return data;
     },
   });

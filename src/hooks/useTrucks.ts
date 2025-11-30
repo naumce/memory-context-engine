@@ -76,21 +76,15 @@ export const useActiveTrucks = () => {
   return useQuery({
     queryKey: ["active-trucks"],
     queryFn: async () => {
-      console.log("Fetching active trucks...");
       const { data: allTrucks, error: allError } = await supabase
         .from("trucks")
         .select("id, status");
 
-      if (allError) {
-        console.error("Error fetching trucks:", allError);
-        throw allError;
-      }
+      if (allError) throw allError;
 
-      console.log("All trucks:", allTrucks);
       const active = allTrucks?.filter(t => t.status === "active").length || 0;
       const total = allTrucks?.length || 0;
 
-      console.log("Active trucks:", active, "Total:", total);
       return { active, total };
     },
   });

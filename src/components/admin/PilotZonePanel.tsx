@@ -27,10 +27,7 @@ const PilotZonePanel = () => {
         .select("*")
         .eq("code", "ZONE-A")
         .single();
-      if (error) {
-        console.error("Error fetching Zone A:", error);
-        throw error;
-      }
+      if (error) throw error;
       return data;
     },
   });

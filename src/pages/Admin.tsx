@@ -14,16 +14,10 @@ const Admin = () => {
   const { data: truckStats, isLoading: trucksLoading } = useActiveTrucks();
   const { data: zones, isLoading: zonesLoading } = useZones();
   
-  console.log("Admin - truckStats:", truckStats);
-  console.log("Admin - zones:", zones);
-  
   const cityHealthScore = 94;
   const householdsEngaged = zones?.reduce((sum, z) => sum + (z.households_count || 0), 0) || 0;
   const wasteCollected = 42;
-  
-  console.log("Admin - householdsEngaged:", householdsEngaged);
 
-  // Show loading state briefly
   if (trucksLoading || zonesLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
