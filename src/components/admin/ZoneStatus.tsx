@@ -1,46 +1,53 @@
-import { MapPin, Users, Trash2, TrendingUp, AlertCircle } from "lucide-react";
+import { MapPin, Users, Trash2, AlertCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-
-const zones = [
-  { 
-    id: "A", 
-    name: "Pilot Zone A", 
-    households: 450, 
-    participation: 87, 
-    collected: 12.4,
-    status: "healthy",
-    nextCollection: "Tomorrow 08:00"
-  },
-  { 
-    id: "B", 
-    name: "Central District", 
-    households: 1200, 
-    participation: 72, 
-    collected: 28.6,
-    status: "warning",
-    nextCollection: "In 4 hours"
-  },
-  { 
-    id: "C", 
-    name: "North Sector", 
-    households: 800, 
-    participation: 65, 
-    collected: 18.2,
-    status: "healthy",
-    nextCollection: "Today 14:00"
-  },
-  { 
-    id: "D", 
-    name: "South Industrial", 
-    households: 350, 
-    participation: 54, 
-    collected: 42.8,
-    status: "critical",
-    nextCollection: "URGENT"
-  },
-];
+import { useZones } from "@/hooks/useZones";
 
 const ZoneStatus = () => {
+  const { data: zones, isLoading } = useZones();
+
+  if (isLoading) {
+    return (
+      <div className="glass rounded-lg border-2 border-border p-6">
+        <p className="text-muted-foreground font-mono text-sm">Loading zones...</p>
+      </div>
+    );
+  }
+
+  const getZoneStatus = (participation: number) => {
+    if (participation < 60) return "critical";
+    if (participation < 75) return "warning";
+    return "healthy";
+  };
+
+  const getNextCollection = (code: string) => {
+    const schedule: Record<string, string> = {
+      "ZONE-A": "Tomorrow 08:00",
+      "ZONE-B": "In 4 hours",
+      "ZONE-C": "Today 14:00",
+      "ZONE-D": "URGENT",
+    };
+    return schedule[code] || "Not scheduled";
+  };
+
+  const getCollectedToday = (code: string) => {
+    const collected: Record<string, number> = {
+      "ZONE-A": 12.4,
+      "ZONE-B": 28.6,
+      "ZONE-C": 18.2,
+      "ZONE-D": 42.8,
+    };
+    return collected[code] || 0;
+  };
+
+  const getParticipationRate = (code: string) => {
+    const rates: Record<string, number> = {
+      "ZONE-A": 87,
+      "ZONE-B": 72,
+      "ZONE-C": 65,
+      "ZONE-D": 54,
+    };
+    return rates[code] || 0;
+  };
   return (
     <div className="glass rounded-lg border-2 border-border p-6">
       <div className="flex items-center gap-3 mb-6">
@@ -54,65 +61,72 @@ const ZoneStatus = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {zones.map((zone) => (
-          <div
-            key={zone.id}
-            className={cn(
-              "glass rounded-lg p-4 border-2 transition-all hover:scale-[1.02]",
-              zone.status === "critical" ? "border-destructive/50" :
-              zone.status === "warning" ? "border-warning/50" :
-              "border-border"
-            )}
-          >
-            {/* Zone Header */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center font-display text-sm",
-                  zone.status === "critical" ? "bg-destructive/20 text-destructive" :
-                  zone.status === "warning" ? "bg-warning/20 text-warning" :
-                  "bg-primary/20 text-primary"
-                )}>
-                  {zone.id}
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm">{zone.name}</h4>
-                  <p className="text-xs text-muted-foreground font-mono">{zone.nextCollection}</p>
-                </div>
-              </div>
-              {zone.status === "critical" && (
-                <AlertCircle className="w-5 h-5 text-destructive animate-pulse" />
+        {zones?.map((zone) => {
+          const participation = getParticipationRate(zone.code);
+          const status = getZoneStatus(participation);
+          
+          return (
+            <div
+              key={zone.id}
+              className={cn(
+                "glass rounded-lg p-4 border-2 transition-all hover:scale-[1.02]",
+                status === "critical" ? "border-destructive/50" :
+                status === "warning" ? "border-warning/50" :
+                "border-border"
               )}
-            </div>
-
-            {/* Metrics */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs">
+            >
+              {/* Zone Header */}
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Users className="w-3 h-3 text-muted-foreground" />
-                  <span className="text-muted-foreground">Households</span>
+                  <div className={cn(
+                    "w-8 h-8 rounded-lg flex items-center justify-center font-display text-sm",
+                    status === "critical" ? "bg-destructive/20 text-destructive" :
+                    status === "warning" ? "bg-warning/20 text-warning" :
+                    "bg-primary/20 text-primary"
+                  )}>
+                    {zone.code.split('-')[1]}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm">{zone.name}</h4>
+                    <p className="text-xs text-muted-foreground font-mono">
+                      {getNextCollection(zone.code)}
+                    </p>
+                  </div>
                 </div>
-                <span className="font-mono font-semibold">{zone.households}</span>
+                {status === "critical" && (
+                  <AlertCircle className="w-5 h-5 text-destructive animate-pulse" />
+                )}
               </div>
 
-              <div className="space-y-1">
+              {/* Metrics */}
+              <div className="space-y-3">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Participation</span>
-                  <span className="font-mono font-semibold">{zone.participation}%</span>
+                  <div className="flex items-center gap-2">
+                    <Users className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-muted-foreground">Households</span>
+                  </div>
+                  <span className="font-mono font-semibold">{zone.households_count}</span>
                 </div>
-                <Progress value={zone.participation} className="h-2" />
-              </div>
 
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <Trash2 className="w-3 h-3 text-muted-foreground" />
-                  <span className="text-muted-foreground">Collected Today</span>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Participation</span>
+                    <span className="font-mono font-semibold">{participation}%</span>
+                  </div>
+                  <Progress value={participation} className="h-2" />
                 </div>
-                <span className="font-mono font-semibold">{zone.collected} tons</span>
+
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <Trash2 className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-muted-foreground">Collected Today</span>
+                  </div>
+                  <span className="font-mono font-semibold">{getCollectedToday(zone.code)} tons</span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
