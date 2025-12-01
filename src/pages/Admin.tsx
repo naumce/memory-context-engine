@@ -1,4 +1,5 @@
 import { Activity, Truck, TrendingUp, Zap } from "lucide-react";
+import AdminNavigation from "@/components/admin/AdminNavigation";
 import MetricCard from "@/components/admin/MetricCard";
 import MapView from "@/components/admin/MapView";
 import FleetList from "@/components/admin/FleetList";
@@ -38,8 +39,10 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <AdminNavigation />
+      
       {/* Header Bar */}
-      <header className="glass border-b border-border sticky top-0 z-50">
+      <header className="glass border-b border-border sticky top-16 z-40">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
