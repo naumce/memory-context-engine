@@ -1,11 +1,13 @@
 import { MapPin, Users, Trash2, AlertCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useZones } from "@/hooks/useZones";
+import { useZonePerformance } from "@/hooks/useZonePerformance";
 
 const ZoneStatus = () => {
   const { data: zones, isLoading } = useZones();
+  const { data: performance, isLoading: perfLoading } = useZonePerformance();
 
-  if (isLoading) {
+  if (isLoading || perfLoading) {
     return (
       <div className="glass rounded-lg border-2 border-border p-6">
         <p className="text-muted-foreground font-mono text-sm">Loading zones...</p>
@@ -19,34 +21,8 @@ const ZoneStatus = () => {
     return "healthy";
   };
 
-  const getNextCollection = (code: string) => {
-    const schedule: Record<string, string> = {
-      "ZONE-A": "Tomorrow 08:00",
-      "ZONE-B": "In 4 hours",
-      "ZONE-C": "Today 14:00",
-      "ZONE-D": "URGENT",
-    };
-    return schedule[code] || "Not scheduled";
-  };
-
-  const getCollectedToday = (code: string) => {
-    const collected: Record<string, number> = {
-      "ZONE-A": 12.4,
-      "ZONE-B": 28.6,
-      "ZONE-C": 18.2,
-      "ZONE-D": 42.8,
-    };
-    return collected[code] || 0;
-  };
-
-  const getParticipationRate = (code: string) => {
-    const rates: Record<string, number> = {
-      "ZONE-A": 87,
-      "ZONE-B": 72,
-      "ZONE-C": 65,
-      "ZONE-D": 54,
-    };
-    return rates[code] || 0;
+  const getPerformanceData = (zoneId: string) => {
+    return performance?.find(p => p.zoneId === zoneId);
   };
   return (
     <div className="glass rounded-lg border-2 border-border p-6">
@@ -62,7 +38,8 @@ const ZoneStatus = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {zones?.map((zone) => {
-          const participation = getParticipationRate(zone.code);
+          const perfData = getPerformanceData(zone.id);
+          const participation = perfData?.participationRate || 0;
           const status = getZoneStatus(participation);
           
           return (
@@ -89,7 +66,7 @@ const ZoneStatus = () => {
                   <div>
                     <h4 className="font-semibold text-sm">{zone.name}</h4>
                     <p className="text-xs text-muted-foreground font-mono">
-                      {getNextCollection(zone.code)}
+                      {perfData?.nextCollection || "Not scheduled"}
                     </p>
                   </div>
                 </div>
@@ -121,7 +98,7 @@ const ZoneStatus = () => {
                     <Trash2 className="w-3 h-3 text-muted-foreground" />
                     <span className="text-muted-foreground">Collected Today</span>
                   </div>
-                  <span className="font-mono font-semibold">{getCollectedToday(zone.code)} tons</span>
+                  <span className="font-mono font-semibold">{perfData?.collectedToday || 0} tons</span>
                 </div>
               </div>
             </div>
