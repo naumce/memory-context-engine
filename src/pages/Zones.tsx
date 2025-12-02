@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { Plus, MapPin, Users, Trash2, Edit, TrendingUp, Activity } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import AdminNavigation from "@/components/admin/AdminNavigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,13 +8,12 @@ import { useZonePerformance } from "@/hooks/useZonePerformance";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { ZoneCreationDialog } from "@/components/zones/ZoneCreationDialog";
 
 const Zones = () => {
+  const navigate = useNavigate();
   const { data: zones, isLoading } = useZones();
   const { data: performance } = useZonePerformance();
   const queryClient = useQueryClient();
-  const [isCreationDialogOpen, setIsCreationDialogOpen] = useState(false);
 
   const handleDeleteZone = async (id: string) => {
     if (!confirm("Are you sure you want to delete this zone?")) return;
@@ -61,7 +60,7 @@ const Zones = () => {
           
           <Button 
             className="bg-primary hover:bg-primary/90"
-            onClick={() => setIsCreationDialogOpen(true)}
+            onClick={() => navigate("/admin/zones/create")}
           >
             <Plus className="w-4 h-4 mr-2" />
             Create New Zone
@@ -155,12 +154,6 @@ const Zones = () => {
           })}
         </div>
       </div>
-
-      <ZoneCreationDialog
-        open={isCreationDialogOpen}
-        onOpenChange={setIsCreationDialogOpen}
-        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["zones"] })}
-      />
     </div>
   );
 };

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import Zones from "./pages/Zones";
+import ZoneCreation from "./pages/ZoneCreation";
 import ZoneDetail from "./pages/ZoneDetail";
 import ZoneOperationsPage from "./pages/ZoneOperationsPage";
 import Households from "./pages/Households";
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/zones" element={<Zones />} />
+          <Route path="/admin/zones/create" element={<ZoneCreation />} />
           <Route path="/admin/zones/:zoneId/analyze" element={<ZoneDetail />} />
           <Route path="/admin/zones/:zoneId/operations" element={<ZoneOperationsPage />} />
           <Route path="/admin/households" element={<Households />} />
