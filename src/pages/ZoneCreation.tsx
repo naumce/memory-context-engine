@@ -182,9 +182,9 @@ const ZoneCreation = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-250px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ height: 'calc(100vh - 250px)', minHeight: '600px' }}>
           {/* Form Section */}
-          <Card className="glass p-6 space-y-6 lg:col-span-1 overflow-y-auto">
+          <Card className="glass p-6 space-y-6 lg:col-span-1 overflow-y-auto h-full">
             <div>
               <Label>Zone Name *</Label>
               <Input
@@ -260,8 +260,8 @@ const ZoneCreation = () => {
           </Card>
 
           {/* Map Section */}
-          <Card className="glass lg:col-span-2 relative overflow-hidden">
-            <div ref={mapContainer} className="w-full h-full" />
+          <Card className="glass lg:col-span-2 relative overflow-hidden h-full p-0">
+            <div ref={mapContainer} className="absolute inset-0" />
           </Card>
         </div>
       </div>
