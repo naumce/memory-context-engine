@@ -30,19 +30,29 @@ export const TrashIslandDialog = ({ open, onOpenChange, zoneId, zoneBoundary }: 
   const addCollectionPoint = useAddCollectionPoint();
 
   useEffect(() => {
-    if (!open || !mapContainer.current || map.current) return;
-
-    mapboxgl.accessToken = MAPBOX_TOKEN;
+    if (!open || !mapContainer.current) return;
     
-    const mapInstance = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/mapbox/dark-v11",
-      center: [20.6783, 41.1781],
-      zoom: 14,
-      maxBounds: [[20.6, 41.15], [20.75, 41.21]],
-    });
+    // Clean up existing map if any
+    if (map.current) {
+      map.current.remove();
+      map.current = null;
+    }
 
-    map.current = mapInstance;
+    // Small delay to ensure DOM is ready
+    const initMap = setTimeout(() => {
+      if (!mapContainer.current) return;
+
+      mapboxgl.accessToken = MAPBOX_TOKEN;
+      
+      const mapInstance = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: "mapbox://styles/mapbox/dark-v11",
+        center: [20.6783, 41.1781],
+        zoom: 14,
+        maxBounds: [[20.6, 41.15], [20.75, 41.21]],
+      });
+
+      map.current = mapInstance;
 
     // Add zone boundary if available
     mapInstance.on('load', () => {
@@ -85,20 +95,27 @@ export const TrashIslandDialog = ({ open, onOpenChange, zoneId, zoneBoundary }: 
       }
     });
 
-    // Click to place marker
-    mapInstance.on('click', (e) => {
-      if (marker.current) {
-        marker.current.remove();
-      }
 
-      marker.current = new mapboxgl.Marker({ color: '#ff0066' })
-        .setLngLat(e.lngLat)
-        .addTo(mapInstance);
+      // Click to place marker
+      mapInstance.on('click', (e) => {
+        if (marker.current) {
+          marker.current.remove();
+        }
 
-      setLocation({ lng: e.lngLat.lng, lat: e.lngLat.lat });
-    });
+        marker.current = new mapboxgl.Marker({ color: '#ff0066' })
+          .setLngLat(e.lngLat)
+          .addTo(mapInstance);
+
+        setLocation({ lng: e.lngLat.lng, lat: e.lngLat.lat });
+      });
+    }, 100);
 
     return () => {
+      clearTimeout(initMap);
+      if (marker.current) {
+        marker.current.remove();
+        marker.current = null;
+      }
       if (map.current) {
         map.current.remove();
         map.current = null;
@@ -182,7 +199,11 @@ export const TrashIslandDialog = ({ open, onOpenChange, zoneId, zoneBoundary }: 
             <p className="text-sm text-muted-foreground mb-2">
               Click on the map to place the trash island marker
             </p>
-            <div ref={mapContainer} className="h-[400px] rounded-lg border border-border" />
+            <div 
+              ref={mapContainer} 
+              className="h-[400px] rounded-lg border border-border relative"
+              style={{ minHeight: '400px' }}
+            />
             {location && (
               <p className="text-xs text-primary mt-2 font-mono">
                 Selected: {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
