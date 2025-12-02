@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import Zones from "./pages/Zones";
 import ZoneDetail from "./pages/ZoneDetail";
+import ZoneOperationsPage from "./pages/ZoneOperationsPage";
 import Households from "./pages/Households";
 import Bins from "./pages/Bins";
 import Campaigns from "./pages/Campaigns";
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/zones" element={<Zones />} />
           <Route path="/admin/zones/:zoneId/analyze" element={<ZoneDetail />} />
+          <Route path="/admin/zones/:zoneId/operations" element={<ZoneOperationsPage />} />
           <Route path="/admin/households" element={<Households />} />
           <Route path="/admin/bins" element={<Bins />} />
           <Route path="/admin/campaigns" element={<Campaigns />} />
