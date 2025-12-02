@@ -141,10 +141,13 @@ const ZoneDetail = () => {
 
       const polygon = data.features[0];
       
-      // Convert GeoJSON to PostGIS geometry
+      // Update zone boundary - convert GeoJSON to PostGIS geometry
+      const geoJsonString = JSON.stringify(polygon.geometry);
+      
+      // @ts-ignore - Function exists in DB but types not yet regenerated
       const { error } = await supabase.rpc("update_zone_boundary", {
         zone_id: zoneId,
-        boundary_geojson: JSON.stringify(polygon.geometry)
+        boundary_geojson: geoJsonString
       });
 
       if (error) throw error;
