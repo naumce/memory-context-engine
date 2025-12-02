@@ -80,11 +80,35 @@ const ZoneDetail = () => {
               "circle-radius": 6,
               "circle-color": "#00ff87"
             }
+          },
+          {
+            id: "gl-draw-polygon-fill-active",
+            type: "fill",
+            paint: {
+              "fill-color": "#00ff87",
+              "fill-opacity": 0.3
+            }
+          },
+          {
+            id: "gl-draw-polygon-stroke-active",
+            type: "line",
+            paint: {
+              "line-color": "#00ff87",
+              "line-width": 3
+            }
           }
         ]
       });
 
       map.current.addControl(draw.current);
+      
+      // Hide draw controls initially
+      setTimeout(() => {
+        const container = document.querySelector('.mapboxgl-ctrl-top-left');
+        if (container) {
+          container.classList.add('hidden');
+        }
+      }, 100);
       map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
       // Set map as loaded immediately after controls are added
@@ -183,17 +207,40 @@ const ZoneDetail = () => {
         loadZoneBoundary();
         setHasUnsavedChanges(false);
         setIsEditing(false);
-        // Hide draw controls
-        if (draw.current && map.current) {
+        if (draw.current) {
+          // Hide controls when exiting edit mode
           draw.current.changeMode('simple_select');
+          const container = document.querySelector('.mapboxgl-ctrl-top-left');
+          if (container) {
+            container.classList.add('hidden');
+          }
         }
       }
     } else {
       setIsEditing(!isEditing);
-      // Show draw controls and enable editing
-      if (!isEditing && draw.current && map.current) {
-        draw.current.changeMode('simple_select');
-        toast.info("Click the polygon tool to start drawing or edit existing boundary");
+      if (!isEditing && draw.current) {
+        // Show controls when entering edit mode
+        const container = document.querySelector('.mapboxgl-ctrl-top-left');
+        if (container) {
+          container.classList.remove('hidden');
+        }
+        
+        // Enable direct_select mode to allow editing existing boundary
+        const features = draw.current.getAll();
+        if (features.features.length > 0) {
+          const featureId = features.features[0].id;
+          draw.current.changeMode('direct_select', { featureId });
+          toast.info("Click and drag vertices to edit the boundary");
+        } else {
+          draw.current.changeMode('draw_polygon');
+          toast.info("Draw the zone boundary on the map");
+        }
+      } else if (isEditing && draw.current) {
+        // Hide controls when toggling off
+        const container = document.querySelector('.mapboxgl-ctrl-top-left');
+        if (container) {
+          container.classList.add('hidden');
+        }
       }
     }
   };
@@ -289,10 +336,12 @@ const ZoneDetail = () => {
             </div>
           )}
           {isEditing && (
-            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-muted/95 backdrop-blur-sm z-10">
-              <p className="text-sm text-muted-foreground">
-                <strong className="text-primary">Editing Mode:</strong> Draw or modify the zone boundary on the map. 
-                Click points to create a polygon. Use the trash icon to delete.
+            <div className="absolute top-4 left-4 right-4 p-4 border border-primary/30 bg-primary/10 backdrop-blur-sm rounded-lg z-10">
+              <p className="text-sm text-foreground font-medium">
+                <strong className="text-primary">✏️ Editing Mode Active</strong>
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Click and drag the boundary vertices to adjust the zone shape. Use the controls in the top-left to draw a new boundary or delete the existing one.
               </p>
             </div>
           )}
