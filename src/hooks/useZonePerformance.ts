@@ -33,14 +33,19 @@ export const useZonePerformance = () => {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           
+          // First get bins in this zone
+          const { data: zoneBins } = await supabase
+            .from("bins")
+            .select("id")
+            .in("household_id", households?.map(h => h.id) || []);
+          
+          const binIds = zoneBins?.map(b => b.id) || [];
+          
+          // Then get collections for those bins
           const { data: collections } = await supabase
             .from("collections")
-            .select(`
-              weight_kg,
-              bins!inner(household_id),
-              households!inner(zone_id)
-            `)
-            .eq("households.zone_id", zone.id)
+            .select("weight_kg")
+            .in("bin_id", binIds)
             .gte("collected_at", today.toISOString());
 
           const collectedToday = collections?.reduce((sum, c) => sum + (c.weight_kg || 0), 0) || 0;
