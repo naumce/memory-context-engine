@@ -23,6 +23,7 @@ const ZoneDetail = () => {
   const draw = useRef<MapboxDraw | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
     if (!map.current && mapContainer.current) {
@@ -86,8 +87,10 @@ const ZoneDetail = () => {
       map.current.addControl(draw.current);
       map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
-      // Load existing boundary if available
-      loadZoneBoundary();
+      map.current.on('load', () => {
+        setMapLoaded(true);
+        loadZoneBoundary();
+      });
 
       // Listen for draw events
       map.current.on("draw.create", () => setHasUnsavedChanges(true));
@@ -96,7 +99,10 @@ const ZoneDetail = () => {
     }
 
     return () => {
-      map.current?.remove();
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
     };
   }, []);
 
@@ -166,9 +172,18 @@ const ZoneDetail = () => {
         loadZoneBoundary();
         setHasUnsavedChanges(false);
         setIsEditing(false);
+        // Hide draw controls
+        if (draw.current && map.current) {
+          draw.current.changeMode('simple_select');
+        }
       }
     } else {
       setIsEditing(!isEditing);
+      // Show draw controls and enable editing
+      if (!isEditing && draw.current && map.current) {
+        draw.current.changeMode('simple_select');
+        toast.info("Click the polygon tool to start drawing or edit existing boundary");
+      }
     }
   };
 
@@ -255,12 +270,17 @@ const ZoneDetail = () => {
         </div>
 
         {/* Map */}
-        <Card className="glass border-2 border-border overflow-hidden">
-          <div ref={mapContainer} className="w-full h-[600px]" />
+        <Card className="glass border-2 border-border overflow-hidden relative" style={{ height: '600px' }}>
+          <div ref={mapContainer} className="absolute inset-0" />
+          {!mapLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-20">
+              <p className="text-muted-foreground">Loading map...</p>
+            </div>
+          )}
           {isEditing && (
-            <div className="p-4 border-t border-border bg-muted/20">
+            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-muted/95 backdrop-blur-sm z-10">
               <p className="text-sm text-muted-foreground">
-                <strong>Editing Mode:</strong> Draw or modify the zone boundary on the map. 
+                <strong className="text-primary">Editing Mode:</strong> Draw or modify the zone boundary on the map. 
                 Click points to create a polygon. Use the trash icon to delete.
               </p>
             </div>
