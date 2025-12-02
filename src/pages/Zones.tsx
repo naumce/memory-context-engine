@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { ZoneEditDialog } from "@/components/zones/ZoneEditDialog";
+import { ZoneCardStats } from "@/components/zones/ZoneCardStats";
 import { useState, useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -256,6 +257,8 @@ const Zones = () => {
                         </div>
                         <span className="font-mono font-semibold">{zone.households_count}</span>
                       </div>
+
+                      <ZoneCardStats zoneId={zone.id} />
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">

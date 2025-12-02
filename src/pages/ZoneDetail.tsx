@@ -5,7 +5,7 @@ import AdminNavigation from "@/components/admin/AdminNavigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useZoneStats } from "@/hooks/useZones";
+import { useZoneStats } from "@/hooks/useZoneStats";
 import { useHouseholds } from "@/hooks/useHouseholds";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -403,7 +403,7 @@ const ZoneDetail = () => {
             <TabsTrigger value="map">Zone Map</TabsTrigger>
             <TabsTrigger value="households">Households ({stats.households})</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="islands">Trash Islands</TabsTrigger>
+            <TabsTrigger value="islands">Islands ({stats.trashIslands})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="map">
@@ -463,6 +463,17 @@ const ZoneDetail = () => {
                 Click and drag the boundary vertices to adjust the zone shape. Use the controls in the top-left to draw a new boundary or delete the existing one.
               </p>
             </div>
+          )}
+          
+          {/* Floating Action Button for Quick Create Trash Island */}
+          {!isEditing && (
+            <Button
+              onClick={() => setAddTrashIslandOpen(true)}
+              className="absolute bottom-6 right-6 z-10 h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90"
+              size="icon"
+            >
+              <MapPin className="h-6 w-6" />
+            </Button>
           )}
         </Card>
           </TabsContent>
