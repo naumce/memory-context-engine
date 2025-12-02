@@ -87,10 +87,13 @@ const ZoneDetail = () => {
       map.current.addControl(draw.current);
       map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
-      map.current.on('load', () => {
-        setMapLoaded(true);
+      // Set map as loaded immediately after controls are added
+      setMapLoaded(true);
+      
+      // Load boundary after a short delay to ensure map is ready
+      setTimeout(() => {
         loadZoneBoundary();
-      });
+      }, 500);
 
       // Listen for draw events
       map.current.on("draw.create", () => setHasUnsavedChanges(true));
@@ -116,21 +119,29 @@ const ZoneDetail = () => {
         .eq("id", zoneId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error loading zone:", error);
+        return;
+      }
 
       if (data?.boundary) {
-        // Convert PostGIS geometry to GeoJSON
-        const { data: geoJson, error: geoError } = await supabase.rpc(
-          "st_asgeojson",
-          { geom: data.boundary }
-        );
-
-        if (!geoError && geoJson) {
-          draw.current.add(JSON.parse(geoJson));
+        // The boundary is already in GeoJSON format from PostGIS
+        const geoJson = typeof data.boundary === 'string' 
+          ? JSON.parse(data.boundary) 
+          : data.boundary;
+        
+        // Add it to the draw control
+        if (geoJson && draw.current) {
+          draw.current.add({
+            type: 'Feature',
+            properties: {},
+            geometry: geoJson
+          });
         }
       }
     } catch (error) {
       console.error("Error loading boundary:", error);
+      toast.error("Could not load zone boundary");
     }
   };
 
