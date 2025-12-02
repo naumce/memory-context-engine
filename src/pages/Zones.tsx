@@ -23,11 +23,13 @@ const Zones = () => {
   const queryClient = useQueryClient();
   const [editingZone, setEditingZone] = useState<Zone | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("grid");
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
 
   useEffect(() => {
-    if (!map.current && mapContainer.current && zones && zones.length > 0) {
+    // Only initialize map when Map View tab is active
+    if (activeTab === "map" && !map.current && mapContainer.current && zones && zones.length > 0) {
       mapboxgl.accessToken = MAPBOX_TOKEN;
       
       map.current = new mapboxgl.Map({
@@ -50,12 +52,12 @@ const Zones = () => {
     }
 
     return () => {
-      if (map.current) {
+      if (map.current && activeTab !== "map") {
         map.current.remove();
         map.current = null;
       }
     };
-  }, [zones]);
+  }, [zones, activeTab]);
 
   const loadZoneBoundaries = async () => {
     if (!map.current || !zones) return;
@@ -189,7 +191,7 @@ const Zones = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue="grid" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="grid">
               <MapPin className="w-4 h-4 mr-2" />
