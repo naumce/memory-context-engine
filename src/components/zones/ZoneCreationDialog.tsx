@@ -127,31 +127,40 @@ export const ZoneCreationDialog = ({ open, onOpenChange, onSuccess }: ZoneCreati
 
       const polygon = data.features[0];
       
-      // @ts-ignore - Function exists in DB
-      const { error } = await supabase.rpc("update_zone_boundary", {
-        zone_id: null, // Will create new zone with boundary
-        boundary_geojson: JSON.stringify(polygon.geometry)
-      });
-
-      // Alternative: Direct insert with boundary
-      const { error: insertError } = await supabase
+      // First, insert the zone to get an ID
+      const { data: newZone, error: insertError } = await supabase
         .from("zones")
         .insert([{
           name: formData.name,
           code: formData.code,
           households_count: formData.households_count,
           status: "active"
-        }]);
+        }])
+        .select()
+        .single();
 
       if (insertError) throw insertError;
+      if (!newZone) throw new Error("Failed to create zone");
 
-      toast.success("Zone created successfully! Now draw the boundary in Zone Detail.");
+      // Now update the boundary using the zone ID
+      const geoJsonString = JSON.stringify(polygon.geometry);
+      
+      // @ts-ignore - Function exists in DB
+      const { error: boundaryError } = await supabase.rpc("update_zone_boundary", {
+        zone_id: newZone.id,
+        boundary_geojson: geoJsonString
+      });
+
+      if (boundaryError) throw boundaryError;
+
+      toast.success("Zone created successfully with boundary!");
       setFormData({ name: "", code: "", households_count: 0 });
       setHasDrawnBoundary(false);
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
       toast.error(error.message || "Failed to create zone");
+      console.error("Zone creation error:", error);
     }
   };
 
