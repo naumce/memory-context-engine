@@ -15,6 +15,8 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import { HouseholdAddDialog } from "@/components/zones/HouseholdAddDialog";
 import { HouseholdList } from "@/components/zones/HouseholdList";
+import { NotificationCreateDialog } from "@/components/zones/NotificationCreateDialog";
+import { NotificationList } from "@/components/zones/NotificationList";
 
 const MAPBOX_TOKEN = "pk.eyJ1Ijoia2Fib20xMSIsImEiOiJjbWE0NnU5NXUwMzF2MnFxdTQxMmFtbHA0In0.LMMt9w1PlrlQCL3WU5lp9Q";
 
@@ -29,6 +31,7 @@ const ZoneDetail = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [addHouseholdOpen, setAddHouseholdOpen] = useState(false);
+  const [addNotificationOpen, setAddNotificationOpen] = useState(false);
   const { data: households } = useHouseholds(zoneId);
 
   useEffect(() => {
@@ -353,9 +356,10 @@ const ZoneDetail = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="map" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+          <TabsList className="grid w-full max-w-md grid-cols-3 mb-6">
             <TabsTrigger value="map">Zone Map</TabsTrigger>
             <TabsTrigger value="households">Households ({stats.households})</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
           </TabsList>
 
           <TabsContent value="map">
@@ -432,6 +436,20 @@ const ZoneDetail = () => {
             </div>
             <HouseholdList zoneId={zoneId!} />
           </TabsContent>
+
+          <TabsContent value="notifications">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-display text-primary">Zone Notifications</h2>
+                <p className="text-sm text-muted-foreground">Send collection reminders and alerts to households</p>
+              </div>
+              <Button onClick={() => setAddNotificationOpen(true)} className="bg-primary">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Notification
+              </Button>
+            </div>
+            <NotificationList zoneId={zoneId!} />
+          </TabsContent>
         </Tabs>
 
         <HouseholdAddDialog
@@ -439,6 +457,12 @@ const ZoneDetail = () => {
           onOpenChange={setAddHouseholdOpen}
           zoneId={zoneId!}
           zoneBoundary={stats?.zone.boundary}
+        />
+        
+        <NotificationCreateDialog
+          open={addNotificationOpen}
+          onOpenChange={setAddNotificationOpen}
+          zoneId={zoneId!}
         />
       </div>
     </div>
