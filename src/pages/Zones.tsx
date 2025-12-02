@@ -170,8 +170,18 @@ const Zones = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Loading zones...</p>
+      <div className="min-h-screen bg-background">
+        <AdminNavigation />
+        <div className="container mx-auto px-6 py-8">
+          <div className="space-y-6">
+            <div className="h-8 w-64 bg-primary/20 rounded animate-pulse" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="h-80 glass border-2 border-border rounded-lg animate-pulse" />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -181,16 +191,18 @@ const Zones = () => {
       <AdminNavigation />
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 animate-fade-in">
           <div>
-            <h1 className="text-3xl font-display text-primary text-glow-primary mb-2">
-              Zone Management
+            <h1 className="text-4xl font-display text-primary text-glow-primary mb-2 tracking-tight">
+              Zone Command Center
             </h1>
-            <p className="text-muted-foreground font-mono">Struga Municipality Collection Zones</p>
+            <p className="text-muted-foreground font-mono text-sm">
+              {zones?.length || 0} Active Zones • Struga Municipality
+            </p>
           </div>
           
           <Button 
-            className="bg-primary hover:bg-primary/90"
+            className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/50 transition-all hover:shadow-xl hover:shadow-primary/60 hover:scale-105"
             onClick={() => navigate("/admin/zones/create")}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -198,34 +210,48 @@ const Zones = () => {
           </Button>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="grid">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full animate-fade-in">
+          <TabsList className="grid w-full max-w-md grid-cols-2 glass border border-border/50">
+            <TabsTrigger value="grid" className="data-[state=active]:shadow-lg data-[state=active]:shadow-primary/30">
               <MapPin className="w-4 h-4 mr-2" />
               Grid View
             </TabsTrigger>
-            <TabsTrigger value="map">
+            <TabsTrigger value="map" className="data-[state=active]:shadow-lg data-[state=active]:shadow-primary/30">
               <MapIcon className="w-4 h-4 mr-2" />
               Map View
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="grid" className="mt-6">
-            {/* Zone Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {zones?.map((zone) => {
+            {!zones || zones.length === 0 ? (
+              <Card className="glass border-2 border-dashed border-border p-12 text-center">
+                <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <h3 className="text-xl font-display text-foreground mb-2">No Zones Yet</h3>
+                <p className="text-muted-foreground mb-6">Create your first collection zone to get started</p>
+                <Button onClick={() => navigate("/admin/zones/create")} className="bg-primary">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create First Zone
+                </Button>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {zones?.map((zone, index) => {
                 const perfData = getPerformanceData(zone.id);
                 const participation = perfData?.participationRate || 0;
                 
                 return (
-                  <Card key={zone.id} className="glass border-2 border-border p-6 hover:border-primary/50 transition-all">
+                  <Card 
+                    key={zone.id} 
+                    className="glass border-2 border-border p-6 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:scale-[1.02] cursor-pointer group animate-fade-in"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-primary/20">
-                          <MapPin className="w-5 h-5 text-primary" />
+                        <div className="p-2 rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
+                          <MapPin className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
                         </div>
                         <div>
-                          <h3 className="font-display text-lg">{zone.name}</h3>
+                          <h3 className="font-display text-lg group-hover:text-primary transition-colors">{zone.name}</h3>
                           <p className="text-sm text-muted-foreground font-mono">{zone.code}</p>
                         </div>
                       </div>
@@ -285,7 +311,7 @@ const Zones = () => {
                     <div className="mt-4 pt-4 border-t border-border flex gap-2">
                       <Button 
                         variant="outline" 
-                        className="flex-1"
+                        className="flex-1 hover:border-primary/50 hover:text-primary transition-all"
                         onClick={() => window.location.href = `/admin/zones/${zone.id}/analyze`}
                       >
                         <TrendingUp className="w-4 h-4 mr-2" />
@@ -293,7 +319,7 @@ const Zones = () => {
                       </Button>
                       <Button 
                         variant="default" 
-                        className="flex-1 bg-primary"
+                        className="flex-1 bg-primary hover:bg-primary/90 shadow-md shadow-primary/30 hover:shadow-lg hover:shadow-primary/40 transition-all"
                         onClick={() => window.location.href = `/admin/zones/${zone.id}/operations`}
                       >
                         <Activity className="w-4 h-4 mr-2" />
@@ -303,18 +329,22 @@ const Zones = () => {
                   </Card>
                 );
               })}
-            </div>
+              </div>
+            )}
           </TabsContent>
 
-          <TabsContent value="map" className="mt-6">
-            <Card className="glass border-2 border-border overflow-hidden" style={{ height: '70vh' }}>
+          <TabsContent value="map" className="mt-6 animate-fade-in">
+            <Card className="glass border-2 border-primary/30 overflow-hidden shadow-2xl shadow-primary/20" style={{ height: '70vh' }}>
               <div ref={mapContainer} className="w-full h-full" />
             </Card>
-            <div className="mt-4 p-4 glass border border-border rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                <strong className="text-primary">Interactive Map:</strong> Click on any zone boundary to view details. 
-                All {zones?.length || 0} zones are displayed with their boundaries.
-              </p>
+            <div className="mt-4 p-4 glass border border-border rounded-lg animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full bg-primary animate-pulse-glow" />
+                <p className="text-sm text-muted-foreground">
+                  <strong className="text-primary font-display">Interactive Zone Map:</strong> Click any boundary to view details. 
+                  <span className="text-foreground font-mono ml-2">{zones?.length || 0} Active Zones</span>
+                </p>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
