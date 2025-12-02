@@ -172,6 +172,7 @@ export const ZoneCreationDialog = ({ open, onOpenChange, onSuccess }: ZoneCreati
             <MapPin className="w-5 h-5 text-primary" />
             Create New Collection Zone
           </DialogTitle>
+          <p className="text-sm text-muted-foreground">Draw zone boundaries and configure details</p>
         </DialogHeader>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
