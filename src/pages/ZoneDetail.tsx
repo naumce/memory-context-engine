@@ -26,104 +26,107 @@ const ZoneDetail = () => {
   const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
-    if (!map.current && mapContainer.current) {
-      mapboxgl.accessToken = MAPBOX_TOKEN;
-      
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: "mapbox://styles/mapbox/dark-v11",
-        center: [20.6783, 41.1781],
-        zoom: 14,
-        pitch: 45,
-        maxBounds: [
-          [20.6, 41.15],
-          [20.75, 41.21]
-        ],
-      });
+    // Wait until stats are loaded and the map container exists
+    if (isLoading || !stats) return;
+    if (map.current || !mapContainer.current) return;
 
-      // Initialize MapboxDraw for zone boundary editing
-      draw.current = new MapboxDraw({
-        displayControlsDefault: false,
-        controls: {
-          polygon: true,
-          trash: true
-        },
-        styles: [
-          {
-            id: "gl-draw-polygon-fill",
-            type: "fill",
-            paint: {
-              "fill-color": "#00ff87",
-              "fill-opacity": 0.2
-            }
-          },
-          {
-            id: "gl-draw-polygon-stroke",
-            type: "line",
-            paint: {
-              "line-color": "#00ff87",
-              "line-width": 3
-            }
-          },
-          {
-            id: "gl-draw-line",
-            type: "line",
-            paint: {
-              "line-color": "#00ff87",
-              "line-width": 2
-            }
-          },
-          {
-            id: "gl-draw-point",
-            type: "circle",
-            paint: {
-              "circle-radius": 6,
-              "circle-color": "#00ff87"
-            }
-          },
-          {
-            id: "gl-draw-polygon-fill-active",
-            type: "fill",
-            paint: {
-              "fill-color": "#00ff87",
-              "fill-opacity": 0.3
-            }
-          },
-          {
-            id: "gl-draw-polygon-stroke-active",
-            type: "line",
-            paint: {
-              "line-color": "#00ff87",
-              "line-width": 3
-            }
+    mapboxgl.accessToken = MAPBOX_TOKEN;
+    
+    const mapInstance = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: "mapbox://styles/mapbox/dark-v11",
+      center: [20.6783, 41.1781],
+      zoom: 14,
+      pitch: 45,
+      maxBounds: [
+        [20.6, 41.15],
+        [20.75, 41.21]
+      ],
+    });
+
+    map.current = mapInstance;
+
+    // Initialize MapboxDraw for zone boundary editing
+    draw.current = new MapboxDraw({
+      displayControlsDefault: false,
+      controls: {
+        polygon: true,
+        trash: true
+      },
+      styles: [
+        {
+          id: "gl-draw-polygon-fill",
+          type: "fill",
+          paint: {
+            "fill-color": "#00ff87",
+            "fill-opacity": 0.2
           }
-        ]
-      });
-
-      map.current.addControl(draw.current);
-      
-      // Hide draw controls initially
-      setTimeout(() => {
-        const container = document.querySelector('.mapboxgl-ctrl-top-left');
-        if (container) {
-          container.classList.add('hidden');
+        },
+        {
+          id: "gl-draw-polygon-stroke",
+          type: "line",
+          paint: {
+            "line-color": "#00ff87",
+            "line-width": 3
+          }
+        },
+        {
+          id: "gl-draw-line",
+          type: "line",
+          paint: {
+            "line-color": "#00ff87",
+            "line-width": 2
+          }
+        },
+        {
+          id: "gl-draw-point",
+          type: "circle",
+          paint: {
+            "circle-radius": 6,
+            "circle-color": "#00ff87"
+          }
+        },
+        {
+          id: "gl-draw-polygon-fill-active",
+          type: "fill",
+          paint: {
+            "fill-color": "#00ff87",
+            "fill-opacity": 0.3
+          }
+        },
+        {
+          id: "gl-draw-polygon-stroke-active",
+          type: "line",
+          paint: {
+            "line-color": "#00ff87",
+            "line-width": 3
+          }
         }
-      }, 100);
-      map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+      ]
+    });
 
-      // Set map as loaded immediately after controls are added
+    mapInstance.addControl(draw.current);
+    
+    // Hide draw controls initially
+    setTimeout(() => {
+      const container = document.querySelector('.mapboxgl-ctrl-top-left');
+      if (container) {
+        container.classList.add('hidden');
+      }
+    }, 100);
+
+    mapInstance.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+    // Mark map as loaded and then load existing boundary once style is ready
+    mapInstance.on('load', () => {
       setMapLoaded(true);
-      
-      // Load boundary after a short delay to ensure map is ready
-      setTimeout(() => {
-        loadZoneBoundary();
-      }, 500);
+      loadZoneBoundary();
+    });
 
-      // Listen for draw events
-      map.current.on("draw.create", () => setHasUnsavedChanges(true));
-      map.current.on("draw.update", () => setHasUnsavedChanges(true));
-      map.current.on("draw.delete", () => setHasUnsavedChanges(true));
-    }
+    // Listen for draw events
+    mapInstance.on("draw.create", () => setHasUnsavedChanges(true));
+    mapInstance.on("draw.update", () => setHasUnsavedChanges(true));
+    mapInstance.on("draw.delete", () => setHasUnsavedChanges(true));
 
     return () => {
       if (map.current) {
@@ -131,7 +134,7 @@ const ZoneDetail = () => {
         map.current = null;
       }
     };
-  }, []);
+  }, [isLoading, stats, zoneId]);
 
   const loadZoneBoundary = async () => {
     if (!zoneId || !draw.current) return;
