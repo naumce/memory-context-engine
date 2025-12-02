@@ -9,6 +9,7 @@ export interface Zone {
   households_count: number;
   created_at: string;
   updated_at: string;
+  boundary?: any;
 }
 
 export const useZones = () => {

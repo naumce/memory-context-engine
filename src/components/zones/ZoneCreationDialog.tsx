@@ -127,6 +127,23 @@ export const ZoneCreationDialog = ({ open, onOpenChange, onSuccess }: ZoneCreati
 
       const polygon = data.features[0];
       
+      // Validate boundary before saving
+      const { validateZoneBoundary, calculateZoneArea } = await import("@/lib/zoneValidation");
+      const validation = validateZoneBoundary(polygon.geometry);
+      
+      if (!validation.isValid) {
+        toast.error("Boundary validation failed");
+        validation.errors.forEach(error => toast.error(error));
+        return;
+      }
+
+      // Show warnings if any
+      if (validation.warnings.length > 0) {
+        validation.warnings.forEach(warning => toast.warning(warning));
+      }
+
+      const area = calculateZoneArea(polygon.geometry);
+      
       // First, insert the zone to get an ID
       const { data: newZone, error: insertError } = await supabase
         .from("zones")
@@ -153,7 +170,7 @@ export const ZoneCreationDialog = ({ open, onOpenChange, onSuccess }: ZoneCreati
 
       if (boundaryError) throw boundaryError;
 
-      toast.success("Zone created successfully with boundary!");
+      toast.success(`Zone created successfully with boundary! Area: ${area?.toFixed(2)} km²`);
       setFormData({ name: "", code: "", households_count: 0 });
       setHasDrawnBoundary(false);
       onSuccess();

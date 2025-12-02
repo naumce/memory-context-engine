@@ -182,6 +182,23 @@ const ZoneDetail = () => {
 
       const polygon = data.features[0];
       
+      // Validate boundary before saving
+      const { validateZoneBoundary, calculateZoneArea } = await import("@/lib/zoneValidation");
+      const validation = validateZoneBoundary(polygon.geometry);
+      
+      if (!validation.isValid) {
+        toast.error("Boundary validation failed");
+        validation.errors.forEach(error => toast.error(error));
+        return;
+      }
+
+      // Show warnings if any
+      if (validation.warnings.length > 0) {
+        validation.warnings.forEach(warning => toast.warning(warning));
+      }
+
+      const area = calculateZoneArea(polygon.geometry);
+      
       // Update zone boundary - convert GeoJSON to PostGIS geometry
       const geoJsonString = JSON.stringify(polygon.geometry);
       
@@ -193,7 +210,7 @@ const ZoneDetail = () => {
 
       if (error) throw error;
 
-      toast.success("Zone boundary saved successfully");
+      toast.success(`Zone boundary saved successfully (${area?.toFixed(2)} km²)`);
       setHasUnsavedChanges(false);
       setIsEditing(false);
     } catch (error: any) {
