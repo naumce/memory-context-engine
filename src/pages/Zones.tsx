@@ -62,74 +62,81 @@ const Zones = () => {
     if (!map.current || !zones) return;
 
     zones.forEach(async (zone) => {
-      if (zone.boundary) {
-        const geoJson = typeof zone.boundary === 'string' 
-          ? JSON.parse(zone.boundary) 
-          : zone.boundary;
+      if (!zone.boundary) return;
 
-        const sourceId = `zone-${zone.id}`;
-        
-        if (map.current?.getSource(sourceId)) {
-          return;
-        }
+      const raw = typeof zone.boundary === "string"
+        ? JSON.parse(zone.boundary)
+        : zone.boundary;
 
-        map.current?.addSource(sourceId, {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {
-              name: zone.name,
-              code: zone.code
-            },
-            geometry: geoJson
-          }
-        });
+      // Normalize to pure GeoJSON geometry (Mapbox GL expects only type + coordinates)
+      const geometry = raw && raw.type && raw.coordinates
+        ? { type: raw.type, coordinates: raw.coordinates }
+        : null;
 
-        map.current?.addLayer({
-          id: `${sourceId}-fill`,
-          type: 'fill',
-          source: sourceId,
-          paint: {
-            'fill-color': '#00ff87',
-            'fill-opacity': 0.2
-          }
-        });
+      if (!geometry) return;
 
-        map.current?.addLayer({
-          id: `${sourceId}-line`,
-          type: 'line',
-          source: sourceId,
-          paint: {
-            'line-color': '#00ff87',
-            'line-width': 2
-          }
-        });
-
-        // Add popup on click
-        map.current?.on('click', `${sourceId}-fill`, (e) => {
-          if (e.features && e.features[0]) {
-            new mapboxgl.Popup()
-              .setLngLat(e.lngLat)
-              .setHTML(`
-                <div class="p-2">
-                  <h3 class="font-bold">${zone.name}</h3>
-                  <p class="text-sm">${zone.code}</p>
-                  <p class="text-xs text-muted-foreground">${zone.households_count} households</p>
-                </div>
-              `)
-              .addTo(map.current!);
-          }
-        });
-
-        // Change cursor on hover
-        map.current?.on('mouseenter', `${sourceId}-fill`, () => {
-          if (map.current) map.current.getCanvas().style.cursor = 'pointer';
-        });
-
-        map.current?.on('mouseleave', `${sourceId}-fill`, () => {
-          if (map.current) map.current.getCanvas().style.cursor = '';
-        });
+      const sourceId = `zone-${zone.id}`;
+      
+      if (map.current?.getSource(sourceId)) {
+        return;
       }
+
+      map.current?.addSource(sourceId, {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: {
+            name: zone.name,
+            code: zone.code
+          },
+          geometry,
+        }
+      });
+
+      map.current?.addLayer({
+        id: `${sourceId}-fill`,
+        type: 'fill',
+        source: sourceId,
+        paint: {
+          'fill-color': '#00ff87',
+          'fill-opacity': 0.2
+        }
+      });
+
+      map.current?.addLayer({
+        id: `${sourceId}-line`,
+        type: 'line',
+        source: sourceId,
+        paint: {
+          'line-color': '#00ff87',
+          'line-width': 2
+        }
+      });
+
+      // Add popup on click
+      map.current?.on('click', `${sourceId}-fill`, (e) => {
+        if (e.features && e.features[0]) {
+          new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+            .setHTML(`
+              <div class="p-2">
+                <h3 class="font-bold">${zone.name}</h3>
+                <p class="text-sm">${zone.code}</p>
+                <p class="text-xs text-muted-foreground">${zone.households_count} households</p>
+              </div>
+            `)
+            .addTo(map.current!);
+        }
+      });
+
+      // Change cursor on hover
+      map.current?.on('mouseenter', `${sourceId}-fill`, () => {
+        if (map.current) map.current.getCanvas().style.cursor = 'pointer';
+      });
+
+      map.current?.on('mouseleave', `${sourceId}-fill`, () => {
+        if (map.current) map.current.getCanvas().style.cursor = '';
+      });
     });
   };
 

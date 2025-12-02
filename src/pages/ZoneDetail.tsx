@@ -151,18 +151,21 @@ const ZoneDetail = () => {
         return;
       }
 
-      if (data?.boundary) {
-        // The boundary is already in GeoJSON format from PostGIS
-        const geoJson = typeof data.boundary === 'string' 
+      if (data?.boundary && draw.current) {
+        const raw = typeof data.boundary === "string" 
           ? JSON.parse(data.boundary) 
           : data.boundary;
-        
-        // Add it to the draw control
-        if (geoJson && draw.current) {
+
+        // Normalize to pure GeoJSON geometry (MapboxDraw doesn't like extra props like `crs`)
+        const geometry = raw && raw.type && raw.coordinates
+          ? { type: raw.type, coordinates: raw.coordinates }
+          : null;
+
+        if (geometry) {
           draw.current.add({
-            type: 'Feature',
+            type: "Feature",
             properties: {},
-            geometry: geoJson
+            geometry,
           });
         }
       }
