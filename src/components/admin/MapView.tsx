@@ -27,10 +27,32 @@ const MapView = () => {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: "mapbox://styles/mapbox/dark-v11",
-        center: [20.7714, 41.1781], // Struga, North Macedonia
-        zoom: 13,
-        pitch: 45,
+        center: [20.6783, 41.1781], // Struga City Center, North Macedonia
+        zoom: 14,
+        pitch: 50,
         bearing: -17.6,
+        maxBounds: [
+          [20.6, 41.15], // Southwest coordinates
+          [20.75, 41.21]  // Northeast coordinates (locked to Struga)
+        ],
+        minZoom: 12,
+        maxZoom: 18,
+      });
+
+      // Add navigation controls
+      map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+      
+      // Prevent user from leaving Struga area
+      map.current.on('dragend', () => {
+        if (!map.current) return;
+        const center = map.current.getCenter();
+        if (center.lng < 20.6 || center.lng > 20.75 || center.lat < 41.15 || center.lat > 41.21) {
+          map.current.flyTo({
+            center: [20.6783, 41.1781],
+            zoom: 14,
+            essential: true
+          });
+        }
       });
 
       map.current.on("load", () => {
