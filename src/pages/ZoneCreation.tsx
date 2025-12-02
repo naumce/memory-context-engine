@@ -151,7 +151,11 @@ const ZoneCreation = () => {
       toast.success("Zone created successfully with boundary!");
       navigate("/admin/zones");
     } catch (error: any) {
-      toast.error(error.message || "Failed to create zone");
+      if (error.code === '23505') {
+        toast.error(`Zone code "${formData.code}" already exists. Please use a different code.`);
+      } else {
+        toast.error(error.message || "Failed to create zone");
+      }
       console.error("Zone creation error:", error);
     }
   };
