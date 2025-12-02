@@ -283,6 +283,293 @@ export type Database = {
           },
         ]
       }
+      zone_campaigns: {
+        Row: {
+          budget: number | null
+          campaign_type: string
+          created_at: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          materials_urls: string[] | null
+          name: string
+          reached_households: number | null
+          start_date: string
+          status: string
+          target_households: number | null
+          updated_at: string | null
+          zone_id: string
+        }
+        Insert: {
+          budget?: number | null
+          campaign_type: string
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          materials_urls?: string[] | null
+          name: string
+          reached_households?: number | null
+          start_date: string
+          status?: string
+          target_households?: number | null
+          updated_at?: string | null
+          zone_id: string
+        }
+        Update: {
+          budget?: number | null
+          campaign_type?: string
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          materials_urls?: string[] | null
+          name?: string
+          reached_households?: number | null
+          start_date?: string
+          status?: string
+          target_households?: number | null
+          updated_at?: string | null
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_campaigns_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zone_documents: {
+        Row: {
+          description: string | null
+          document_type: string
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          mime_type: string | null
+          tags: string[] | null
+          title: string
+          uploaded_at: string | null
+          uploaded_by: string | null
+          zone_id: string
+        }
+        Insert: {
+          description?: string | null
+          document_type: string
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          mime_type?: string | null
+          tags?: string[] | null
+          title: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+          zone_id: string
+        }
+        Update: {
+          description?: string | null
+          document_type?: string
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          mime_type?: string | null
+          tags?: string[] | null
+          title?: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_documents_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zone_notifications: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          message: string
+          notification_type: string
+          scheduled_for: string | null
+          send_method: string[] | null
+          sent_at: string | null
+          severity: string
+          status: string
+          target_audience: string
+          title: string
+          updated_at: string | null
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          message: string
+          notification_type: string
+          scheduled_for?: string | null
+          send_method?: string[] | null
+          sent_at?: string | null
+          severity?: string
+          status?: string
+          target_audience?: string
+          title: string
+          updated_at?: string | null
+          zone_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          message?: string
+          notification_type?: string
+          scheduled_for?: string | null
+          send_method?: string[] | null
+          sent_at?: string | null
+          severity?: string
+          status?: string
+          target_audience?: string
+          title?: string
+          updated_at?: string | null
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_notifications_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zone_reports: {
+        Row: {
+          contamination_rate: number | null
+          generated_at: string | null
+          generated_by: string | null
+          households_active: number | null
+          households_total: number | null
+          id: string
+          participation_rate: number | null
+          report_data: Json | null
+          report_period_end: string
+          report_period_start: string
+          report_type: string
+          report_url: string | null
+          total_collections: number | null
+          total_weight_kg: number | null
+          zone_id: string
+        }
+        Insert: {
+          contamination_rate?: number | null
+          generated_at?: string | null
+          generated_by?: string | null
+          households_active?: number | null
+          households_total?: number | null
+          id?: string
+          participation_rate?: number | null
+          report_data?: Json | null
+          report_period_end: string
+          report_period_start: string
+          report_type: string
+          report_url?: string | null
+          total_collections?: number | null
+          total_weight_kg?: number | null
+          zone_id: string
+        }
+        Update: {
+          contamination_rate?: number | null
+          generated_at?: string | null
+          generated_by?: string | null
+          households_active?: number | null
+          households_total?: number | null
+          id?: string
+          participation_rate?: number | null
+          report_data?: Json | null
+          report_period_end?: string
+          report_period_start?: string
+          report_type?: string
+          report_url?: string | null
+          total_collections?: number | null
+          total_weight_kg?: number | null
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_reports_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zone_schedules: {
+        Row: {
+          collection_type: string
+          created_at: string | null
+          day_of_week: number
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          time_slot: string | null
+          truck_id: string | null
+          updated_at: string | null
+          zone_id: string
+        }
+        Insert: {
+          collection_type: string
+          created_at?: string | null
+          day_of_week: number
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          time_slot?: string | null
+          truck_id?: string | null
+          updated_at?: string | null
+          zone_id: string
+        }
+        Update: {
+          collection_type?: string
+          created_at?: string | null
+          day_of_week?: number
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          time_slot?: string | null
+          truck_id?: string | null
+          updated_at?: string | null
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_schedules_truck_id_fkey"
+            columns: ["truck_id"]
+            isOneToOne: false
+            referencedRelation: "trucks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zone_schedules_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zones: {
         Row: {
           boundary: unknown

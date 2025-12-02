@@ -3,43 +3,18 @@ import { Plus, MapPin, Users, Trash2, Edit, TrendingUp, Activity } from "lucide-
 import AdminNavigation from "@/components/admin/AdminNavigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useZones } from "@/hooks/useZones";
 import { useZonePerformance } from "@/hooks/useZonePerformance";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { ZoneCreationDialog } from "@/components/zones/ZoneCreationDialog";
 
 const Zones = () => {
   const { data: zones, isLoading } = useZones();
   const { data: performance } = useZonePerformance();
   const queryClient = useQueryClient();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    code: "",
-    households_count: 0,
-    status: "active"
-  });
-
-  const handleCreateZone = async () => {
-    try {
-      const { error } = await supabase
-        .from("zones")
-        .insert([formData]);
-
-      if (error) throw error;
-
-      toast.success("Zone created successfully");
-      setIsDialogOpen(false);
-      setFormData({ name: "", code: "", households_count: 0, status: "active" });
-      queryClient.invalidateQueries({ queryKey: ["zones"] });
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
+  const [isCreationDialogOpen, setIsCreationDialogOpen] = useState(false);
 
   const handleDeleteZone = async (id: string) => {
     if (!confirm("Are you sure you want to delete this zone?")) return;
@@ -84,49 +59,13 @@ const Zones = () => {
             <p className="text-muted-foreground font-mono">Struga Municipality Collection Zones</p>
           </div>
           
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary/90">
-                <Plus className="w-4 h-4 mr-2" />
-                Create New Zone
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="glass">
-              <DialogHeader>
-                <DialogTitle>Create New Collection Zone</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 mt-4">
-                <div>
-                  <Label>Zone Name</Label>
-                  <Input
-                    placeholder="e.g., Downtown District"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label>Zone Code</Label>
-                  <Input
-                    placeholder="e.g., ZONE-E"
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label>Estimated Households</Label>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    value={formData.households_count}
-                    onChange={(e) => setFormData({ ...formData, households_count: parseInt(e.target.value) || 0 })}
-                  />
-                </div>
-                <Button onClick={handleCreateZone} className="w-full">
-                  Create Zone
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            className="bg-primary hover:bg-primary/90"
+            onClick={() => setIsCreationDialogOpen(true)}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create New Zone
+          </Button>
         </div>
 
         {/* Zone Grid */}
@@ -193,14 +132,22 @@ const Zones = () => {
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-border">
+                <div className="mt-4 pt-4 border-t border-border flex gap-2">
                   <Button 
                     variant="outline" 
-                    className="w-full"
+                    className="flex-1"
                     onClick={() => window.location.href = `/admin/zones/${zone.id}/analyze`}
                   >
                     <TrendingUp className="w-4 h-4 mr-2" />
-                    Analyze Zone
+                    Analyze
+                  </Button>
+                  <Button 
+                    variant="default" 
+                    className="flex-1 bg-primary"
+                    onClick={() => window.location.href = `/admin/zones/${zone.id}/operations`}
+                  >
+                    <Activity className="w-4 h-4 mr-2" />
+                    Operations
                   </Button>
                 </div>
               </Card>
@@ -208,6 +155,12 @@ const Zones = () => {
           })}
         </div>
       </div>
+
+      <ZoneCreationDialog
+        open={isCreationDialogOpen}
+        onOpenChange={setIsCreationDialogOpen}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["zones"] })}
+      />
     </div>
   );
 };
