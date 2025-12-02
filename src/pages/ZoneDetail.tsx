@@ -1,16 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, MapPin, Users, TrendingUp, Save, Edit2 } from "lucide-react";
+import { ArrowLeft, MapPin, Users, TrendingUp, Save, Edit2, Plus } from "lucide-react";
 import AdminNavigation from "@/components/admin/AdminNavigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useZoneStats } from "@/hooks/useZones";
+import { useHouseholds } from "@/hooks/useHouseholds";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
+import { HouseholdAddDialog } from "@/components/zones/HouseholdAddDialog";
+import { HouseholdList } from "@/components/zones/HouseholdList";
 
 const MAPBOX_TOKEN = "pk.eyJ1Ijoia2Fib20xMSIsImEiOiJjbWE0NnU5NXUwMzF2MnFxdTQxMmFtbHA0In0.LMMt9w1PlrlQCL3WU5lp9Q";
 
@@ -24,6 +28,8 @@ const ZoneDetail = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [addHouseholdOpen, setAddHouseholdOpen] = useState(false);
+  const { data: households } = useHouseholds(zoneId);
 
   useEffect(() => {
     // Wait until stats are loaded and the map container exists
@@ -121,6 +127,7 @@ const ZoneDetail = () => {
     mapInstance.on('load', () => {
       setMapLoaded(true);
       loadZoneBoundary();
+      loadHouseholdMarkers();
     });
 
     // Listen for draw events
@@ -135,6 +142,39 @@ const ZoneDetail = () => {
       }
     };
   }, [isLoading, stats, zoneId]);
+
+  const loadHouseholdMarkers = () => {
+    if (!map.current || !households) return;
+
+    households.forEach((household) => {
+      if (!household.location) return;
+
+      const raw = typeof household.location === "string"
+        ? JSON.parse(household.location)
+        : household.location;
+
+      if (raw && raw.type === "Point" && raw.coordinates) {
+        const [lng, lat] = raw.coordinates;
+
+        const marker = new mapboxgl.Marker({ color: "#00ff87" })
+          .setLngLat([lng, lat])
+          .setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setHTML(`
+              <div class="p-2">
+                <p class="font-bold text-sm">${household.address}</p>
+                ${household.contact_name ? `<p class="text-xs text-muted-foreground">${household.contact_name}</p>` : ""}
+                <p class="text-xs text-primary font-mono mt-1">${household.participation_rate}% participation</p>
+              </div>
+            `)
+          )
+          .addTo(map.current);
+      }
+    });
+  };
+
+  useEffect(() => {
+    loadHouseholdMarkers();
+  }, [households]);
 
   const loadZoneBoundary = async () => {
     if (!zoneId || !draw.current) return;
@@ -311,8 +351,16 @@ const ZoneDetail = () => {
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Tabs */}
+        <Tabs defaultValue="map" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+            <TabsTrigger value="map">Zone Map</TabsTrigger>
+            <TabsTrigger value="households">Households ({stats.households})</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="map">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="glass border-2 border-border p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 rounded-lg bg-primary/20">
@@ -369,6 +417,29 @@ const ZoneDetail = () => {
             </div>
           )}
         </Card>
+          </TabsContent>
+
+          <TabsContent value="households">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-display text-primary">Registered Households</h2>
+                <p className="text-sm text-muted-foreground">Manage households in this collection zone</p>
+              </div>
+              <Button onClick={() => setAddHouseholdOpen(true)} className="bg-primary">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Household
+              </Button>
+            </div>
+            <HouseholdList zoneId={zoneId!} />
+          </TabsContent>
+        </Tabs>
+
+        <HouseholdAddDialog
+          open={addHouseholdOpen}
+          onOpenChange={setAddHouseholdOpen}
+          zoneId={zoneId!}
+          zoneBoundary={stats?.zone.boundary}
+        />
       </div>
     </div>
   );
