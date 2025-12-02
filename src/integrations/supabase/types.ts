@@ -17,9 +17,10 @@ export type Database = {
       bins: {
         Row: {
           bin_type: string
+          collection_point_id: string | null
           created_at: string | null
           fill_level: number | null
-          household_id: string
+          household_id: string | null
           id: string
           last_collection: string | null
           qr_code: string
@@ -28,9 +29,10 @@ export type Database = {
         }
         Insert: {
           bin_type: string
+          collection_point_id?: string | null
           created_at?: string | null
           fill_level?: number | null
-          household_id: string
+          household_id?: string | null
           id?: string
           last_collection?: string | null
           qr_code: string
@@ -39,9 +41,10 @@ export type Database = {
         }
         Update: {
           bin_type?: string
+          collection_point_id?: string | null
           created_at?: string | null
           fill_level?: number | null
-          household_id?: string
+          household_id?: string | null
           id?: string
           last_collection?: string | null
           qr_code?: string
@@ -50,10 +53,67 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "bins_collection_point_id_fkey"
+            columns: ["collection_point_id"]
+            isOneToOne: false
+            referencedRelation: "collection_points"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "bins_household_id_fkey"
             columns: ["household_id"]
             isOneToOne: false
             referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collection_points: {
+        Row: {
+          capacity: number | null
+          created_at: string | null
+          current_bins: number | null
+          id: string
+          location: unknown
+          name: string
+          notes: string | null
+          point_type: string
+          status: string
+          updated_at: string | null
+          zone_id: string
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string | null
+          current_bins?: number | null
+          id?: string
+          location: unknown
+          name: string
+          notes?: string | null
+          point_type?: string
+          status?: string
+          updated_at?: string | null
+          zone_id: string
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string | null
+          current_bins?: number | null
+          id?: string
+          location?: unknown
+          name?: string
+          notes?: string | null
+          point_type?: string
+          status?: string
+          updated_at?: string | null
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_points_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
             referencedColumns: ["id"]
           },
         ]

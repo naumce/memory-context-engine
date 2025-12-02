@@ -17,6 +17,9 @@ import { HouseholdAddDialog } from "@/components/zones/HouseholdAddDialog";
 import { HouseholdList } from "@/components/zones/HouseholdList";
 import { NotificationCreateDialog } from "@/components/zones/NotificationCreateDialog";
 import { NotificationList } from "@/components/zones/NotificationList";
+import { TrashIslandDialog } from "@/components/zones/TrashIslandDialog";
+import { TrashIslandList } from "@/components/zones/TrashIslandList";
+import { useCollectionPoints } from "@/hooks/useCollectionPoints";
 
 const MAPBOX_TOKEN = "pk.eyJ1Ijoia2Fib20xMSIsImEiOiJjbWE0NnU5NXUwMzF2MnFxdTQxMmFtbHA0In0.LMMt9w1PlrlQCL3WU5lp9Q";
 
@@ -32,7 +35,9 @@ const ZoneDetail = () => {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [addHouseholdOpen, setAddHouseholdOpen] = useState(false);
   const [addNotificationOpen, setAddNotificationOpen] = useState(false);
+  const [addTrashIslandOpen, setAddTrashIslandOpen] = useState(false);
   const { data: households } = useHouseholds(zoneId);
+  const { data: collectionPoints } = useCollectionPoints(zoneId);
 
   useEffect(() => {
     // Wait until stats are loaded and the map container exists
@@ -131,6 +136,7 @@ const ZoneDetail = () => {
       setMapLoaded(true);
       loadZoneBoundary();
       loadHouseholdMarkers();
+      loadCollectionPointMarkers();
     });
 
     // Listen for draw events
@@ -175,9 +181,46 @@ const ZoneDetail = () => {
     });
   };
 
+  const loadCollectionPointMarkers = () => {
+    if (!map.current || !collectionPoints) return;
+
+    collectionPoints.forEach((point) => {
+      if (!point.location) return;
+
+      const raw = typeof point.location === "string"
+        ? JSON.parse(point.location)
+        : point.location;
+
+      if (raw && raw.type === "Point" && raw.coordinates) {
+        const [lng, lat] = raw.coordinates;
+
+        const el = document.createElement('div');
+        el.className = 'trash-island-marker';
+        el.style.backgroundImage = 'url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIHZpZXdCb3g9IjAgMCAzMCAzMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTUiIGN5PSIxNSIgcj0iMTIiIGZpbGw9IiNmZjAwNjYiLz4KPHBhdGggZD0iTTEwIDEySDIwVjE5SDEwVjEyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)';
+        el.style.width = '30px';
+        el.style.height = '30px';
+        el.style.backgroundSize = 'contain';
+
+        new mapboxgl.Marker(el)
+          .setLngLat([lng, lat])
+          .setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setHTML(`
+              <div class="p-2">
+                <p class="font-bold text-sm text-primary">🗑️ ${point.name}</p>
+                <p class="text-xs text-muted-foreground mt-1">Capacity: ${point.current_bins}/${point.capacity} bins</p>
+                <p class="text-xs text-muted-foreground">Status: ${point.status}</p>
+              </div>
+            `)
+          )
+          .addTo(map.current);
+      }
+    });
+  };
+
   useEffect(() => {
     loadHouseholdMarkers();
-  }, [households]);
+    loadCollectionPointMarkers();
+  }, [households, collectionPoints]);
 
   const loadZoneBoundary = async () => {
     if (!zoneId || !draw.current) return;
@@ -356,10 +399,11 @@ const ZoneDetail = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="map" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-3 mb-6">
+          <TabsList className="grid w-full max-w-md grid-cols-4 mb-6">
             <TabsTrigger value="map">Zone Map</TabsTrigger>
             <TabsTrigger value="households">Households ({stats.households})</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            <TabsTrigger value="islands">Trash Islands</TabsTrigger>
           </TabsList>
 
           <TabsContent value="map">
@@ -450,6 +494,20 @@ const ZoneDetail = () => {
             </div>
             <NotificationList zoneId={zoneId!} />
           </TabsContent>
+
+          <TabsContent value="islands">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-display text-primary">Trash Islands</h2>
+                <p className="text-sm text-muted-foreground">Centralized collection points for multiple bins</p>
+              </div>
+              <Button onClick={() => setAddTrashIslandOpen(true)} className="bg-primary">
+                <Plus className="w-4 w-4 mr-2" />
+                Create Trash Island
+              </Button>
+            </div>
+            <TrashIslandList zoneId={zoneId!} />
+          </TabsContent>
         </Tabs>
 
         <HouseholdAddDialog
@@ -463,6 +521,13 @@ const ZoneDetail = () => {
           open={addNotificationOpen}
           onOpenChange={setAddNotificationOpen}
           zoneId={zoneId!}
+        />
+
+        <TrashIslandDialog
+          open={addTrashIslandOpen}
+          onOpenChange={setAddTrashIslandOpen}
+          zoneId={zoneId!}
+          zoneBoundary={stats?.zone.boundary}
         />
       </div>
     </div>
