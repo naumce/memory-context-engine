@@ -285,6 +285,7 @@ export type Database = {
       }
       zones: {
         Row: {
+          boundary: unknown
           code: string
           created_at: string | null
           households_count: number | null
@@ -294,6 +295,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          boundary?: unknown
           code: string
           created_at?: string | null
           households_count?: number | null
@@ -303,6 +305,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          boundary?: unknown
           code?: string
           created_at?: string | null
           households_count?: number | null
@@ -486,6 +489,7 @@ export type Database = {
             }
             Returns: string
           }
+      calculate_zone_area: { Args: { zone_id: string }; Returns: number }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {
@@ -619,6 +623,10 @@ export type Database = {
       geomfromewkt: { Args: { "": string }; Returns: unknown }
       gettransactionid: { Args: never; Returns: unknown }
       longtransactionsenabled: { Args: never; Returns: boolean }
+      point_in_zone: {
+        Args: { lat: number; lng: number; zone_id: string }
+        Returns: boolean
+      }
       populate_geometry_columns:
         | { Args: { use_typmod?: boolean }; Returns: string }
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
