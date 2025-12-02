@@ -51,12 +51,11 @@ const Zones = () => {
       });
     }
 
-    return () => {
-      if (map.current && activeTab !== "map") {
-        map.current.remove();
-        map.current = null;
-      }
-    };
+    // Cleanup when switching away from map tab
+    if (activeTab !== "map" && map.current) {
+      map.current.remove();
+      map.current = null;
+    }
   }, [zones, activeTab]);
 
   const loadZoneBoundaries = async () => {
