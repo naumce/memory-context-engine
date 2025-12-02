@@ -260,7 +260,7 @@ const ZoneCreation = () => {
           </Card>
 
           {/* Map Section */}
-          <Card className="glass lg:col-span-2 relative overflow-hidden h-full p-0">
+          <Card className="glass lg:col-span-2 relative overflow-hidden min-h-[400px] lg:h-full p-0">
             <div ref={mapContainer} className="absolute inset-0" />
           </Card>
         </div>
