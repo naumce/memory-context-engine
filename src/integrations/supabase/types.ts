@@ -68,6 +68,159 @@ export type Database = {
           },
         ]
       }
+      citizen_issues: {
+        Row: {
+          address: string | null
+          category: string
+          citizen_user_id: string
+          created_at: string
+          description: string
+          id: string
+          location: unknown
+          photo_url: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+          zone_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          category?: string
+          citizen_user_id: string
+          created_at?: string
+          description: string
+          id?: string
+          location?: unknown
+          photo_url?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          citizen_user_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          location?: unknown
+          photo_url?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "citizen_issues_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      citizen_profiles: {
+        Row: {
+          address: string | null
+          avatar_url: string | null
+          created_at: string
+          full_name: string
+          id: string
+          phone: string | null
+          recycling_streak: number
+          total_points: number
+          updated_at: string
+          user_id: string
+          zone_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          recycling_streak?: number
+          total_points?: number
+          updated_at?: string
+          user_id: string
+          zone_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          recycling_streak?: number
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "citizen_profiles_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      citizen_recycling_logs: {
+        Row: {
+          bin_id: string | null
+          citizen_user_id: string
+          created_at: string
+          id: string
+          logged_at: string
+          points_earned: number
+          waste_type: string
+          weight_kg: number | null
+        }
+        Insert: {
+          bin_id?: string | null
+          citizen_user_id: string
+          created_at?: string
+          id?: string
+          logged_at?: string
+          points_earned?: number
+          waste_type: string
+          weight_kg?: number | null
+        }
+        Update: {
+          bin_id?: string | null
+          citizen_user_id?: string
+          created_at?: string
+          id?: string
+          logged_at?: string
+          points_earned?: number
+          waste_type?: string
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "citizen_recycling_logs_bin_id_fkey"
+            columns: ["bin_id"]
+            isOneToOne: false
+            referencedRelation: "bins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collection_points: {
         Row: {
           capacity: number | null

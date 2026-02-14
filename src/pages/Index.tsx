@@ -27,10 +27,12 @@ const Index = () => {
                   Command Center
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="glass font-display text-lg border-secondary text-secondary hover:bg-secondary/10">
-                <Smartphone className="w-5 h-5 mr-2" />
-                Citizen App (Coming Soon)
-              </Button>
+              <Link to="/citizen/auth">
+                <Button size="lg" variant="outline" className="glass font-display text-lg border-secondary text-secondary hover:bg-secondary/10">
+                  <Smartphone className="w-5 h-5 mr-2" />
+                  Citizen Portal
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
